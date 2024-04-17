@@ -19,13 +19,16 @@ public class UserService {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
-        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
+        String username = passwordEncoder.encode(requestDto.getUsername());
+        String password = passwordEncoder.encode(requestDto.getPassword());
+        String email = passwordEncoder.encode(requestDto.getEmail());
+        String address = passwordEncoder.encode(requestDto.getAddress());
 
         User user = User.builder()
-                .username(requestDto.getUsername())
-                .password(encodedPassword)
-                .email(requestDto.getEmail())
-                .address(requestDto.getAddress())
+                .username(username)
+                .password(password)
+                .email(email)
+                .address(address)
                 .phoneNumber(requestDto.getPhoneNumber())
                 .build();
 
