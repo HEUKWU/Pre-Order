@@ -1,8 +1,8 @@
 package com.heukwu.preorder.user.service;
 
-import com.heukwu.preorder.exception.BusinessException;
-import com.heukwu.preorder.exception.ErrorMessage;
-import com.heukwu.preorder.exception.NotFoundException;
+import com.heukwu.preorder.common.exception.BusinessException;
+import com.heukwu.preorder.common.exception.ErrorMessage;
+import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.jwt.JwtUtil;
 import com.heukwu.preorder.user.dto.MyPageResponseDto;
 import com.heukwu.preorder.user.dto.UserRequestDto;

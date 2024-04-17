@@ -1,8 +1,8 @@
 package com.heukwu.preorder.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.heukwu.preorder.exception.ErrorMessage;
-import com.heukwu.preorder.exception.ErrorResponse;
+import com.heukwu.preorder.common.exception.ErrorMessage;
+import com.heukwu.preorder.common.exception.ErrorResponse;
 import com.heukwu.preorder.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;

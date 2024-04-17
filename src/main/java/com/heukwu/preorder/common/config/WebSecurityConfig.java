@@ -1,4 +1,4 @@
-package com.heukwu.preorder.config;
+package com.heukwu.preorder.common.config;
 
 import com.heukwu.preorder.jwt.JwtUtil;
 import com.heukwu.preorder.security.JwtAuthenticationFilter;

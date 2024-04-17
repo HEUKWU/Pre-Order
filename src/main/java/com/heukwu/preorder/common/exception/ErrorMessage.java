@@ -1,4 +1,4 @@
-package com.heukwu.preorder.exception;
+package com.heukwu.preorder.common.exception;
 
 import lombok.Getter;
 

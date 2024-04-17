@@ -1,4 +1,4 @@
-package com.heukwu.preorder.exception;
+package com.heukwu.preorder.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
