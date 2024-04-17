@@ -12,8 +12,12 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +26,15 @@ public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${encrypt.password}")
+    String encryptPassword;
+
+    @Value("${encrypt.salt}")
+    String encryptSalt;
+
     public void signup(UserRequestDto.Signup requestDto) {
-        if (userRepository.findUserByUsername(requestDto.getUsername()).isPresent()) {
+        Optional<User> findUser = userRepository.findUserByUsername(requestDto.getUsername());
+        if (findUser.isPresent()) {
             throw new BusinessException(ErrorMessage.DUPLICATE_USERNAME);
         }
 
@@ -31,17 +42,26 @@ public class UserService {
             throw new BusinessException(ErrorMessage.DUPLICATE_EMAIL);
         }
 
-        String password = passwordEncoder.encode(requestDto.getPassword());
+        String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
+        String encryptedAddress = encryptValue(requestDto.getAddress());
 
         User user = User.builder()
                 .username(requestDto.getUsername())
-                .password(password)
+                .password(encryptedPassword)
                 .email(requestDto.getEmail())
-                .address(requestDto.getAddress())
+                .address(encryptedAddress)
                 .phoneNumber(requestDto.getPhoneNumber())
                 .build();
 
         userRepository.save(user);
+    }
+
+    private String encryptValue(String value) {
+        return Encryptors.text(encryptPassword, encryptSalt).encrypt(value);
+    }
+
+    private String decryptValue(String value) {
+        return Encryptors.text(encryptPassword, encryptSalt).decrypt(value);
     }
 
     public void logout(HttpServletResponse response) {
@@ -60,7 +80,8 @@ public class UserService {
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
-        findUser.updateAddress(address);
+        String encryptedAddress = encryptValue(address);
+        findUser.updateAddress(encryptedAddress);
     }
 
     @Transactional
@@ -87,10 +108,12 @@ public class UserService {
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
+        String address = decryptValue(findUser.getAddress());
+
         MyPageResponseDto responseDto = MyPageResponseDto.builder()
                 .name(findUser.getUsername())
                 .email(findUser.getEmail())
-                .address(findUser.getAddress())
+                .address(address)
                 .phoneNumber(findUser.getPhoneNumber())
                 .build();
 

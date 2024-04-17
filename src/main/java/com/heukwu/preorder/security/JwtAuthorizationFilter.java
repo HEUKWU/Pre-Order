@@ -1,5 +1,8 @@
 package com.heukwu.preorder.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heukwu.preorder.exception.ErrorMessage;
+import com.heukwu.preorder.exception.ErrorResponse;
 import com.heukwu.preorder.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -7,6 +10,8 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -36,6 +41,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(tokenValue)) {
 
             if (!jwtUtil.validateToken(tokenValue)) {
+                jwtExceptionHandler(response, ErrorMessage.TOKEN_ERROR, HttpStatus.UNAUTHORIZED);
                 log.error("Token Error");
                 return;
             }
@@ -65,5 +71,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+    }
+
+    private void jwtExceptionHandler(HttpServletResponse response, ErrorMessage message, HttpStatus status) {
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(HttpStatus.UNAUTHORIZED.value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        try {
+            String json = new ObjectMapper().writeValueAsString(ErrorResponse.of(status.value(), message.getMessage()));
+            response.getWriter().write(json);
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
     }
 }
