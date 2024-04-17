@@ -30,5 +30,17 @@ public class User {
 
     @Column(nullable = false)
     private String phoneNumber;
+
+    public void updateAddress(String address) {
+        this.address = address;
+    }
+
+    public void updatePhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public void updatePassword(String password) {
+        this.password = password;
+    }
 }
 

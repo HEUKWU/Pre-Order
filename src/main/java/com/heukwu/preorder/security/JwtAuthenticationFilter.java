@@ -44,24 +44,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-        try {
-            String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
-            String token = jwtUtil.createToken(username);
+        String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
+        String token = jwtUtil.createToken(username);
 
-            log.info("[JwtAuthenticationFilter] token : " + token);
+        log.info("[JwtAuthenticationFilter] token : " + token);
 
-            response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
-
-            response.setContentType("application/json;charset=UTF-8");
-            response.setCharacterEncoding("UTF-8");
-            response.setStatus(HttpServletResponse.SC_OK);
-            response.getWriter().write(token);
-            response.getWriter().flush();
-            response.getWriter().close();
-
-        } catch (IOException e) {
-            log.error("IOException 발생 : " + e.getMessage());
-        }
+        response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
     }
 
     @Override

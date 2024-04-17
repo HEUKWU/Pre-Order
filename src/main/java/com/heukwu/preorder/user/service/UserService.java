@@ -6,6 +6,7 @@ import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -46,5 +47,35 @@ public class UserService {
         cookie.setMaxAge(0);
 
         response.addCookie(cookie);
+    }
+
+    @Transactional
+    public void updateAddress(String address, User user) {
+        User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
+                () -> new UsernameNotFoundException("Not Found")
+        );
+
+        String encodedAddress = passwordEncoder.encode(address);
+        findUser.updateAddress(encodedAddress);
+    }
+
+    @Transactional
+    public void updatePhoneNumber(String phoneNumber, User user) {
+        User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
+                () -> new UsernameNotFoundException("Not Found")
+        );
+
+        String encodedPhoneNumber = passwordEncoder.encode(phoneNumber);
+        findUser.updatePhoneNumber(encodedPhoneNumber);
+    }
+
+    @Transactional
+    public void updatePassword(UserRequestDto.Password password, User user) {
+        User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
+                () -> new UsernameNotFoundException("Not Found")
+        );
+
+        String encodedPassword = passwordEncoder.encode(password.getPassword());
+        findUser.updatePassword(encodedPassword);
     }
 }
