@@ -1,6 +1,10 @@
 package com.heukwu.preorder.user.service;
 
+import com.heukwu.preorder.exception.BusinessException;
+import com.heukwu.preorder.exception.ErrorMessage;
+import com.heukwu.preorder.exception.NotFoundException;
 import com.heukwu.preorder.jwt.JwtUtil;
+import com.heukwu.preorder.user.dto.MyPageResponseDto;
 import com.heukwu.preorder.user.dto.UserRequestDto;
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.user.repository.UserRepository;
@@ -8,7 +12,6 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,18 +24,20 @@ public class UserService {
 
     public void signup(UserRequestDto.Signup requestDto) {
         if (userRepository.findUserByUsername(requestDto.getUsername()).isPresent()) {
-            throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
+            throw new BusinessException(ErrorMessage.DUPLICATE_USERNAME);
+        }
+
+        if (userRepository.findUserByEmail(requestDto.getEmail()).isPresent()) {
+            throw new BusinessException(ErrorMessage.DUPLICATE_EMAIL);
         }
 
         String password = passwordEncoder.encode(requestDto.getPassword());
-        String email = passwordEncoder.encode(requestDto.getEmail());
-        String address = passwordEncoder.encode(requestDto.getAddress());
 
         User user = User.builder()
                 .username(requestDto.getUsername())
                 .password(password)
-                .email(email)
-                .address(address)
+                .email(requestDto.getEmail())
+                .address(requestDto.getAddress())
                 .phoneNumber(requestDto.getPhoneNumber())
                 .build();
 
@@ -52,30 +57,43 @@ public class UserService {
     @Transactional
     public void updateAddress(String address, User user) {
         User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
-                () -> new UsernameNotFoundException("Not Found")
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
-        String encodedAddress = passwordEncoder.encode(address);
-        findUser.updateAddress(encodedAddress);
+        findUser.updateAddress(address);
     }
 
     @Transactional
     public void updatePhoneNumber(String phoneNumber, User user) {
         User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
-                () -> new UsernameNotFoundException("Not Found")
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
-        String encodedPhoneNumber = passwordEncoder.encode(phoneNumber);
-        findUser.updatePhoneNumber(encodedPhoneNumber);
+        findUser.updatePhoneNumber(phoneNumber);
     }
 
     @Transactional
     public void updatePassword(UserRequestDto.Password password, User user) {
         User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
-                () -> new UsernameNotFoundException("Not Found")
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
         String encodedPassword = passwordEncoder.encode(password.getPassword());
         findUser.updatePassword(encodedPassword);
+    }
+
+    public MyPageResponseDto getMyPage(User user) {
+        User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
+        );
+
+        MyPageResponseDto responseDto = MyPageResponseDto.builder()
+                .name(findUser.getUsername())
+                .email(findUser.getEmail())
+                .address(findUser.getAddress())
+                .phoneNumber(findUser.getPhoneNumber())
+                .build();
+
+        return responseDto;
     }
 }
