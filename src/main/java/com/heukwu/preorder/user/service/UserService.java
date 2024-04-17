@@ -4,6 +4,7 @@ import com.heukwu.preorder.jwt.JwtUtil;
 import com.heukwu.preorder.user.dto.UserRequestDto;
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -35,5 +36,15 @@ public class UserService {
                 .build();
 
         userRepository.save(user);
+    }
+
+    public void logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie(JwtUtil.AUTHORIZATION_HEADER, null);
+        cookie.setPath("/");
+        cookie.setHttpOnly(true);
+        cookie.setSecure(true);
+        cookie.setMaxAge(0);
+
+        response.addCookie(cookie);
     }
 }
