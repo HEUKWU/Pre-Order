@@ -1,7 +1,7 @@
 package com.heukwu.preorder.user.service;
 
 import com.heukwu.preorder.user.dto.UserRequestDto;
-import com.heukwu.preorder.user.repository.User;
+import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;

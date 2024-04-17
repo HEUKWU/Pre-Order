@@ -1,4 +1,4 @@
-package com.heukwu.preorder.user.repository;
+package com.heukwu.preorder.user.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
