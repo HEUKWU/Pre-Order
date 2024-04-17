@@ -25,4 +25,10 @@ public class UserRequestDto {
         @NotBlank
         private String phoneNumber;
     }
+
+    @Getter
+    public static class Login {
+        private String username;
+        private String password;
+    }
 }

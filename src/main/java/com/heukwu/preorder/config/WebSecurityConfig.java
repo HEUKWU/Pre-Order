@@ -1,7 +1,14 @@
 package com.heukwu.preorder.config;
 
+import com.heukwu.preorder.jwt.JwtUtil;
+import com.heukwu.preorder.security.JwtAuthenticationFilter;
+import com.heukwu.preorder.security.JwtAuthorizationFilter;
+import com.heukwu.preorder.security.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -9,14 +16,38 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig {
+
+    private final JwtUtil jwtUtil;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
+    }
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil);
+        filter.setAuthenticationManager(authenticationManager(authenticationConfiguration));
+
+        return filter;
+    }
+
+    @Bean
+    public JwtAuthorizationFilter jwtAuthorizationFilter() {
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
     }
 
     @Bean
@@ -32,6 +63,9 @@ public class WebSecurityConfig {
                         .requestMatchers("/user/**").permitAll()
                         .anyRequest().authenticated()
         );
+
+        httpSecurity.addFilterBefore(jwtAuthorizationFilter(), JwtAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return httpSecurity.build();
     }
