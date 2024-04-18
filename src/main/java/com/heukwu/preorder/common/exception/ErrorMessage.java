@@ -10,6 +10,7 @@ public enum ErrorMessage {
     TOKEN_ERROR("유효하지 않은 토큰입니다."),
     NOT_FOUND_PRODUCT("해당 상품을 찾을 수 없습니다."),
     NOT_FOUND_WISHLIST_PRODUCT("해당 장바구니 상품을 찾을 수 없습니다."),
+    NOT_FOUND_WISHLIST("장바구니를 찾을 수 없습니다.")
     ;
 
     private final String message;

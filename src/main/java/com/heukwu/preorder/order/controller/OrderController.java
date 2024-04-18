@@ -33,4 +33,11 @@ public class OrderController {
 
         return ResponseDto.of(userOrderInfo);
     }
+
+    @PostMapping("/order-wishlist")
+    public ResponseDto<List<OrderResponseDto>> orderWishlist(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<OrderResponseDto> orderResponseDtoList = orderService.orderWishlist(userDetails.getUser());
+
+        return ResponseDto.of(orderResponseDtoList);
+    }
 }

@@ -1,5 +1,6 @@
 package com.heukwu.preorder.order.service;
 
+import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.order.dto.OrderRequestDto;
@@ -17,6 +18,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,7 +41,7 @@ public class OrderService {
         int quantity = requestDto.getQuantity();
         product.decreaseQuantity(quantity);
 
-        // 장바구니 주문
+        // 장바구니 삭제 처리
         orderInWishlist(user, product);
 
         Order order = Order.builder()
@@ -73,5 +75,45 @@ public class OrderService {
         List<OrderResponseDto> orderResposeDtoList = orderList.stream().map(OrderResponseDto::of).toList();
 
         return orderResposeDtoList;
+    }
+
+    @Transactional
+    public List<OrderResponseDto> orderWishlist(User user) {
+        Wishlist wishlist = wishlistRepository.findWishlistByUserId(user.getId()).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_WISHLIST)
+        );
+
+        List<WishlistProduct> wishlistProducts = wishlist.getWishlistProducts();
+
+        // 주문 생성
+        List<OrderResponseDto> orderResponseDtoList = createOrder(user, wishlistProducts);
+
+        return orderResponseDtoList;
+    }
+
+    private List<OrderResponseDto> createOrder(User user, List<WishlistProduct> wishlistProducts) {
+        List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
+
+        for (WishlistProduct wishlistProduct : wishlistProducts) {
+            // 장바구니 상품
+            Product product = wishlistProduct.getProduct();
+            // 주문에 따른 상품 수량 감소
+            product.decreaseQuantity(wishlistProduct.getQuantity());
+
+            // 주문 생성
+            Order order = Order.builder()
+                    .quantity(wishlistProduct.getQuantity())
+                    .totalPrice(wishlistProduct.getQuantity() * product.getPrice())
+                    .user(user)
+                    .product(product)
+                    .build();
+
+            orderRepository.save(order);
+            // 장바구니 상품 삭제
+            wishlistProductRepository.delete(wishlistProduct);
+            orderResponseDtoList.add(OrderResponseDto.of(order));
+        }
+
+        return orderResponseDtoList;
     }
 }
