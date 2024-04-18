@@ -15,7 +15,7 @@ public class Product {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private Long id;
 
     @Column(nullable = false)
     private String name;
@@ -28,5 +28,8 @@ public class Product {
 
     @Column(nullable = false)
     private int quantity;
-}
 
+    public void decreaseQuantity(int quantity) {
+        this.quantity -= quantity;
+    }
+}
