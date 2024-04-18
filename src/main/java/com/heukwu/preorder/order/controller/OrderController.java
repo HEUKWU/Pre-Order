@@ -1,5 +1,6 @@
 package com.heukwu.preorder.order.controller;
 
+import com.heukwu.preorder.common.SuccessMessage;
 import com.heukwu.preorder.common.dto.ResponseDto;
 import com.heukwu.preorder.common.security.UserDetailsImpl;
 import com.heukwu.preorder.order.dto.OrderRequestDto;
@@ -7,10 +8,7 @@ import com.heukwu.preorder.order.dto.OrderResponseDto;
 import com.heukwu.preorder.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -39,5 +37,12 @@ public class OrderController {
         List<OrderResponseDto> orderResponseDtoList = orderService.orderWishlist(userDetails.getUser());
 
         return ResponseDto.of(orderResponseDtoList);
+    }
+
+    @DeleteMapping("/order")
+    public ResponseDto<String> cancelOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        orderService.cancelOrder(userDetails.getUser());
+
+        return ResponseDto.of(SuccessMessage.CANCEL_ORDER.getMessage());
     }
 }

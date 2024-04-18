@@ -138,4 +138,21 @@ public class OrderService {
             order.updateStatus(OrderStatus.COMPLETE);
         }
     }
+
+    @Transactional
+    public void cancelOrder(User user) {
+        List<Order> orderList = orderRepository.findAllByUserId(user.getId());
+
+        for (Order order : orderList) {
+            // 배송이 시작되었다면 취소 불가
+            if (order.getStatus() != OrderStatus.CREATED) {
+                throw new BusinessException(ErrorMessage.CANNOT_CANCEL_ORDER);
+            }
+
+            order.updateStatus(OrderStatus.CANCELED);
+            // 상품 재고 복구
+            Product product = order.getProduct();
+            product.increaseQuantity(order.getQuantity());
+        }
+    }
 }

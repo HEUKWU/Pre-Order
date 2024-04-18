@@ -8,7 +8,8 @@ public enum SuccessMessage {
     LOGIN("로그인이 완료되었습니다."),
     UPDATE_ADDRESS("주소 변경이 완료되었습니다."),
     UPDATE_PHONE_NUMBER("전화번호 변경이 완료되었습니다."),
-    UPDATE_PASSWORD("비밀번호 변경이 완료되었습니다.")
+    UPDATE_PASSWORD("비밀번호 변경이 완료되었습니다."),
+    CANCEL_ORDER("주문이 취소되었습니다."),
     ;
 
     private final String message;
