@@ -43,11 +43,13 @@ public class UserService {
         }
 
         String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
+        String encryptedName = encryptValue(requestDto.getName());
         String encryptedAddress = encryptValue(requestDto.getAddress());
 
         User user = User.builder()
                 .username(requestDto.getUsername())
                 .password(encryptedPassword)
+                .name(encryptedName)
                 .email(requestDto.getEmail())
                 .address(encryptedAddress)
                 .phoneNumber(requestDto.getPhoneNumber())
@@ -108,10 +110,12 @@ public class UserService {
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
+        String name = decryptValue(findUser.getName());
         String address = decryptValue(findUser.getAddress());
 
         MyPageResponseDto responseDto = MyPageResponseDto.builder()
-                .name(findUser.getUsername())
+                .name(name)
+                .username(findUser.getUsername())
                 .email(findUser.getEmail())
                 .address(address)
                 .phoneNumber(findUser.getPhoneNumber())
