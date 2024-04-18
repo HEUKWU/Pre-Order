@@ -7,6 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+
+import java.time.LocalDate;
 
 @Entity(name = "orders")
 @Builder
@@ -32,4 +36,17 @@ public class Order {
     @ManyToOne
     @JoinColumn(name = "productId")
     private Product product;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
+
+    @CreatedDate
+    private LocalDate createdAt;
+
+    @LastModifiedDate
+    private LocalDate modifiedAt;
+
+    public void updateStatus(OrderStatus status) {
+        this.status = status;
+    }
 }

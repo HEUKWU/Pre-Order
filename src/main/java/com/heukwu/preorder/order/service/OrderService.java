@@ -6,6 +6,7 @@ import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.order.dto.OrderRequestDto;
 import com.heukwu.preorder.order.dto.OrderResponseDto;
 import com.heukwu.preorder.order.entity.Order;
+import com.heukwu.preorder.order.entity.OrderStatus;
 import com.heukwu.preorder.order.repository.OrderRepository;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
@@ -18,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -41,7 +43,7 @@ public class OrderService {
         int quantity = requestDto.getQuantity();
         product.decreaseQuantity(quantity);
 
-        // 장바구니 삭제 처리
+        // 장바구니 상품 처리
         orderInWishlist(user, product);
 
         Order order = Order.builder()
@@ -49,6 +51,7 @@ public class OrderService {
                 .totalPrice(product.getPrice() * requestDto.getQuantity())
                 .user(user)
                 .product(product)
+                .status(OrderStatus.CREATED)
                 .build();
 
         orderRepository.save(order);
@@ -106,6 +109,7 @@ public class OrderService {
                     .totalPrice(wishlistProduct.getQuantity() * product.getPrice())
                     .user(user)
                     .product(product)
+                    .status(OrderStatus.CREATED)
                     .build();
 
             orderRepository.save(order);
@@ -115,5 +119,23 @@ public class OrderService {
         }
 
         return orderResponseDtoList;
+    }
+
+    // 주문 상태 변경
+    @Transactional
+    public void updateOrderStatus() {
+        List<Order> createdOrders = orderRepository.findAllByStatusAndModifiedAtBefore(OrderStatus.CREATED, LocalDateTime.now().minusDays(1));
+
+        // 생성 후 하루 지난 주문 배송중 처리
+        for (Order order : createdOrders) {
+            order.updateStatus(OrderStatus.SHIPPING);
+        }
+
+        List<Order> shippingOrders = orderRepository.findAllByStatusAndModifiedAtBefore(OrderStatus.SHIPPING, LocalDateTime.now().minusDays(1));
+
+        // 배송 시작 후 하루 지난 주문 배송완료 처리
+        for (Order order : shippingOrders) {
+            order.updateStatus(OrderStatus.COMPLETE);
+        }
     }
 }
