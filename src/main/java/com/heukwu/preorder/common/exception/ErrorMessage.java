@@ -12,6 +12,7 @@ public enum ErrorMessage {
     NOT_FOUND_WISHLIST_PRODUCT("해당 장바구니 상품을 찾을 수 없습니다."),
     NOT_FOUND_WISHLIST("장바구니를 찾을 수 없습니다."),
     CANNOT_CANCEL_ORDER("배송중에는 주문 취소가 불가능합니다."),
+    CANNOT_RETURN_ORDER("배송이 완료되지 않은 상품은 반품이 불가능합니다."),
     ;
 
     private final String message;

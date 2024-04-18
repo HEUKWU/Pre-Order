@@ -19,6 +19,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -121,6 +122,37 @@ public class OrderService {
         return orderResponseDtoList;
     }
 
+    @Transactional
+    public void cancelOrder(User user) {
+        List<Order> orderList = orderRepository.findAllByUserId(user.getId());
+
+        for (Order order : orderList) {
+            // 배송이 시작되었다면 취소 불가
+            if (order.getStatus() != OrderStatus.CREATED) {
+                throw new BusinessException(ErrorMessage.CANNOT_CANCEL_ORDER);
+            }
+
+            order.updateStatus(OrderStatus.CANCELED);
+            // 상품 재고 복구
+            Product product = order.getProduct();
+            product.increaseQuantity(order.getQuantity());
+        }
+    }
+
+    @Transactional
+    public void returnOrder(User user) {
+        List<Order> orderList = orderRepository.findAllByUserId(user.getId());
+
+        for (Order order : orderList) {
+            // 배송이 완료되지 않았거나 배송완료 후 하루 이상 지나면 반품 불가
+            if (order.getStatus() != OrderStatus.COMPLETE || LocalDate.now().isAfter(order.getModifiedAt().plusDays(1))) {
+                throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER);
+            }
+
+            order.updateStatus(OrderStatus.RETURNING);
+        }
+    }
+
     // 주문 상태 변경
     @Transactional
     public void updateOrderStatus() {
@@ -137,22 +169,15 @@ public class OrderService {
         for (Order order : shippingOrders) {
             order.updateStatus(OrderStatus.COMPLETE);
         }
-    }
 
-    @Transactional
-    public void cancelOrder(User user) {
-        List<Order> orderList = orderRepository.findAllByUserId(user.getId());
+        List<Order> returnedOrders = orderRepository.findAllByStatusAndModifiedAtBefore(OrderStatus.RETURNING, LocalDateTime.now().minusDays(1));
 
-        for (Order order : orderList) {
-            // 배송이 시작되었다면 취소 불가
-            if (order.getStatus() != OrderStatus.CREATED) {
-                throw new BusinessException(ErrorMessage.CANNOT_CANCEL_ORDER);
-            }
-
-            order.updateStatus(OrderStatus.CANCELED);
-            // 상품 재고 복구
+        // 반품 완료 후 하루 지난 상품 재고 복구
+        for (Order order : returnedOrders) {
             Product product = order.getProduct();
+
             product.increaseQuantity(order.getQuantity());
+            order.updateStatus(OrderStatus.RETURNED);
         }
     }
 }

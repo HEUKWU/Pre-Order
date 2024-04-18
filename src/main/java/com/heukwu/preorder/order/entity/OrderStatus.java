@@ -5,6 +5,7 @@ public enum OrderStatus {
     SHIPPING("배송중"),
     COMPLETE("배송완료"),
     CANCELED("취소완료"),
+    RETURNING("반품중"),
     RETURNED("반품완료"),
     ;
 

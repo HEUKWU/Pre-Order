@@ -10,6 +10,7 @@ public enum SuccessMessage {
     UPDATE_PHONE_NUMBER("전화번호 변경이 완료되었습니다."),
     UPDATE_PASSWORD("비밀번호 변경이 완료되었습니다."),
     CANCEL_ORDER("주문이 취소되었습니다."),
+    RETURN_ORDER("반품 처리되었습니다."),
     ;
 
     private final String message;

@@ -45,4 +45,11 @@ public class OrderController {
 
         return ResponseDto.of(SuccessMessage.CANCEL_ORDER.getMessage());
     }
+
+    @PutMapping("/order")
+    public ResponseDto<String> returnOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        orderService.returnOrder(userDetails.getUser());
+
+        return ResponseDto.of(SuccessMessage.RETURN_ORDER.getMessage());
+    }
 }
