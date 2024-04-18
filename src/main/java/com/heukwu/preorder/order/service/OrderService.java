@@ -9,9 +9,12 @@ import com.heukwu.preorder.order.repository.OrderRepository;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import com.heukwu.preorder.user.entity.User;
+import com.heukwu.preorder.wishlist.repository.WishlistRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -41,5 +44,12 @@ public class OrderService {
         orderRepository.save(order);
 
         return OrderResponseDto.of(order);
+    }
+
+    public List<OrderResponseDto> getUserOrderInfo(User user) {
+        List<Order> orderList = orderRepository.findAllByUserId(user.getId());
+        List<OrderResponseDto> orderResposeDtoList = orderList.stream().map(OrderResponseDto::of).toList();
+
+        return orderResposeDtoList;
     }
 }

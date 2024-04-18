@@ -7,9 +7,12 @@ import com.heukwu.preorder.order.dto.OrderResponseDto;
 import com.heukwu.preorder.order.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,5 +25,12 @@ public class OrderController {
         OrderResponseDto orderResponseDto = orderService.orderProduct(requestDto, userDetails.getUser());
 
         return ResponseDto.of(orderResponseDto);
+    }
+
+    @GetMapping("/order")
+    public ResponseDto<List<OrderResponseDto>> getUserOrderInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<OrderResponseDto> userOrderInfo = orderService.getUserOrderInfo(userDetails.getUser());
+
+        return ResponseDto.of(userOrderInfo);
     }
 }
