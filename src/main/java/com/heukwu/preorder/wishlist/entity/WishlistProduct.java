@@ -16,7 +16,7 @@ public class WishlistProduct {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long wishlistProductId;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "wishlistId")
@@ -30,5 +30,9 @@ public class WishlistProduct {
 
     public void increaseQuantity(int quantity) {
         this.quantity += quantity;
+    }
+
+    public void updateQuantity(int quantity) {
+        this.quantity = quantity;
     }
 }

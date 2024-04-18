@@ -1,10 +1,12 @@
 package com.heukwu.preorder.wishlist.service;
 
+import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import com.heukwu.preorder.user.entity.User;
+import com.heukwu.preorder.user.repository.UserRepository;
 import com.heukwu.preorder.wishlist.dto.WishlistRequestDto;
 import com.heukwu.preorder.wishlist.dto.WishlistResponseDto;
 import com.heukwu.preorder.wishlist.entity.Wishlist;
@@ -25,9 +27,10 @@ public class WishlistService {
     private final ProductRepository productRepository;
     private final WishlistProductRepository wishlistProductRepository;
     private final WishlistRepository wishlistRepository;
+    private final UserRepository userRepository;
 
     @Transactional
-    public WishlistResponseDto addWishlist(WishlistRequestDto requestDto, User user) {
+    public WishlistResponseDto addWishlist(WishlistRequestDto.Create requestDto, User user) {
         Product product = productRepository.findById(requestDto.getProductId()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
         );
@@ -65,7 +68,7 @@ public class WishlistService {
         return wishlist;
     }
 
-    private WishlistProduct createWishlistProduct(WishlistRequestDto requestDto, Wishlist wishlist, Product product) {
+    private WishlistProduct createWishlistProduct(WishlistRequestDto.Create requestDto, Wishlist wishlist, Product product) {
         Optional<WishlistProduct> optionalWishlistProduct = wishlistProductRepository.findWishlistProductByWishlistIdAndProductId(wishlist.getId(), product.getId());
 
         WishlistProduct wishlistProduct;
@@ -85,5 +88,17 @@ public class WishlistService {
         }
 
         return wishlistProduct;
+    }
+
+    @Transactional
+    public WishlistResponseDto updateWishlist(WishlistRequestDto.Update requestDto) {
+
+        WishlistProduct wishlistProduct = wishlistProductRepository.findById(requestDto.getWishlistProductId()).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_WISHLIST_PRODUCT)
+        );
+
+        wishlistProduct.updateQuantity(requestDto.getQuantity());
+
+        return WishlistResponseDto.of(wishlistProduct);
     }
 }

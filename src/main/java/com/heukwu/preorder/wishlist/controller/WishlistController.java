@@ -18,7 +18,7 @@ public class WishlistController {
     private final WishlistService wishlistService;
 
     @PostMapping("/wishlist")
-    public ResponseDto<WishlistResponseDto> addWishlist(@RequestBody WishlistRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto<WishlistResponseDto> addWishlist(@RequestBody WishlistRequestDto.Create requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         WishlistResponseDto wishlistResponseDto = wishlistService.addWishlist(requestDto, userDetails.getUser());
 
         return ResponseDto.of(wishlistResponseDto);
@@ -29,5 +29,12 @@ public class WishlistController {
         List<WishlistResponseDto> wishlistResponseDtoList = wishlistService.getUserWishlist(userDetails.getUser());
 
         return ResponseDto.of(wishlistResponseDtoList);
+    }
+
+    @PutMapping("/wishlist")
+    public ResponseDto<WishlistResponseDto> updateWishlist(@RequestBody WishlistRequestDto.Update requestDto) {
+        WishlistResponseDto wishlistResponseDto = wishlistService.updateWishlist(requestDto);
+
+        return ResponseDto.of(wishlistResponseDto);
     }
 }
