@@ -2,13 +2,14 @@ package com.heukwu.preorder.wishlist.controller;
 
 import com.heukwu.preorder.common.dto.ResponseDto;
 import com.heukwu.preorder.common.security.UserDetailsImpl;
+import com.heukwu.preorder.wishlist.dto.WishlistRequestDto;
 import com.heukwu.preorder.wishlist.dto.WishlistResponseDto;
 import com.heukwu.preorder.wishlist.service.WishlistService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -16,10 +17,17 @@ public class WishlistController {
 
     private final WishlistService wishlistService;
 
-    @PostMapping("/wishlist/{productId}")
-    public ResponseDto<WishlistResponseDto> addWishlist(@PathVariable Long productId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        WishlistResponseDto wishlistResponseDto = wishlistService.addWishlist(productId, userDetails.getUser());
+    @PostMapping("/wishlist")
+    public ResponseDto<WishlistResponseDto> addWishlist(@RequestBody WishlistRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        WishlistResponseDto wishlistResponseDto = wishlistService.addWishlist(requestDto, userDetails.getUser());
 
         return ResponseDto.of(wishlistResponseDto);
+    }
+
+    @GetMapping("/wishlist")
+    public ResponseDto<List<WishlistResponseDto>> getUserWishlist(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<WishlistResponseDto> wishlistResponseDtoList = wishlistService.getUserWishlist(userDetails.getUser());
+
+        return ResponseDto.of(wishlistResponseDtoList);
     }
 }

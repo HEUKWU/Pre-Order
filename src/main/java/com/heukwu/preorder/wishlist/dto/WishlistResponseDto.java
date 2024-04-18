@@ -10,11 +10,17 @@ public class WishlistResponseDto {
 
     private long userId;
     private long productId;
+    private int quantity;
+    private String productPageUrl;
 
     public static WishlistResponseDto of(WishlistProduct wishlistProduct) {
+        Long productId = wishlistProduct.getProduct().getId();
+
         return WishlistResponseDto.builder()
                 .userId(wishlistProduct.getWishlist().getUser().getId())
-                .productId(wishlistProduct.getProduct().getId())
+                .productId(productId)
+                .quantity(wishlistProduct.getQuantity())
+                .productPageUrl("/product/" + productId)
                 .build();
     }
 }

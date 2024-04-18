@@ -7,6 +7,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Entity
 @Builder
 @AllArgsConstructor
@@ -21,4 +23,7 @@ public class Wishlist {
     @ManyToOne
     @JoinColumn(name = "userId")
     private User user;
+
+    @OneToMany(mappedBy = "wishlist")
+    private List<WishlistProduct> wishlistProducts;
 }

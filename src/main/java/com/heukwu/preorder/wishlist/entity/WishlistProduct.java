@@ -25,4 +25,10 @@ public class WishlistProduct {
     @ManyToOne
     @JoinColumn(name = "productId")
     private Product product;
+
+    private int quantity;
+
+    public void increaseQuantity(int quantity) {
+        this.quantity += quantity;
+    }
 }
