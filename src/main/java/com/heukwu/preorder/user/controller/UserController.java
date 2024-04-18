@@ -2,7 +2,7 @@ package com.heukwu.preorder.user.controller;
 
 import com.heukwu.preorder.common.SuccessMessage;
 import com.heukwu.preorder.common.dto.ResponseDto;
-import com.heukwu.preorder.security.UserDetailsImpl;
+import com.heukwu.preorder.common.security.UserDetailsImpl;
 import com.heukwu.preorder.user.dto.MyPageResponseDto;
 import com.heukwu.preorder.user.dto.UserRequestDto;
 import com.heukwu.preorder.user.service.UserService;

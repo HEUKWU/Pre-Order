@@ -1,4 +1,4 @@
-package com.heukwu.preorder.security;
+package com.heukwu.preorder.common.security;
 
 import com.heukwu.preorder.user.entity.User;
 import org.springframework.security.core.GrantedAuthority;

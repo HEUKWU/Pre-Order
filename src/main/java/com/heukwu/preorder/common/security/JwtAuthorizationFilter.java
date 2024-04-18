@@ -1,4 +1,4 @@
-package com.heukwu.preorder.security;
+package com.heukwu.preorder.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heukwu.preorder.common.exception.ErrorMessage;

@@ -1,4 +1,4 @@
-package com.heukwu.preorder.security;
+package com.heukwu.preorder.common.security;
 
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.user.repository.UserRepository;
