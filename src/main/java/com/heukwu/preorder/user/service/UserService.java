@@ -4,10 +4,12 @@ import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.common.util.EncryptUtil;
+import com.heukwu.preorder.email.repository.EmailRepository;
 import com.heukwu.preorder.jwt.JwtUtil;
 import com.heukwu.preorder.user.dto.MyPageResponseDto;
 import com.heukwu.preorder.user.dto.UserRequestDto;
 import com.heukwu.preorder.user.entity.User;
+import com.heukwu.preorder.user.entity.UserRoleEnum;
 import com.heukwu.preorder.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
@@ -23,6 +25,7 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final EmailRepository emailRepository;
     private final PasswordEncoder passwordEncoder;
     private final EncryptUtil encryptor;
 
@@ -32,13 +35,11 @@ public class UserService {
             throw new BusinessException(ErrorMessage.DUPLICATE_USERNAME);
         }
 
-        String email = requestDto.getEmail();
-        String encryptedEmail = encryptor.encrypt(email);
-
-        if (userRepository.findUserByEmail(encryptedEmail).isPresent()) {
-            throw new BusinessException(ErrorMessage.DUPLICATE_EMAIL);
+        if (emailRepository.findEmailByEmail(encryptor.encrypt(requestDto.getEmail())).isEmpty()) {
+            throw new BusinessException(ErrorMessage.UNAUTHENTICATED_EMAIL);
         }
 
+        String encryptedEmail = encryptor.encrypt(requestDto.getEmail());
         String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
         String encryptedName = encryptor.encrypt(requestDto.getName());
         String encryptedAddress = encryptor.encrypt(requestDto.getAddress());
@@ -46,6 +47,7 @@ public class UserService {
         User user = User.builder()
                 .username(requestDto.getUsername())
                 .password(encryptedPassword)
+                .role(UserRoleEnum.USER)
                 .name(encryptedName)
                 .email(encryptedEmail)
                 .address(encryptedAddress)
