@@ -50,7 +50,6 @@ public class WishlistService {
 
     @Transactional
     public WishlistResponseDto updateWishlist(WishlistRequestDto.Update requestDto) {
-
         WishlistProduct wishlistProduct = wishlistProductRepository.findById(requestDto.getWishlistProductId()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_WISHLIST_PRODUCT)
         );
