@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heukwu.preorder.common.SuccessMessage;
 import com.heukwu.preorder.jwt.JwtUtil;
 import com.heukwu.preorder.user.dto.UserRequestDto;
+import com.heukwu.preorder.user.entity.UserRoleEnum;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -45,8 +46,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException {
-        String username = ((UserDetailsImpl) authResult.getPrincipal()).getUsername();
-        String token = jwtUtil.createToken(username);
+        UserDetailsImpl userDetails = (UserDetailsImpl) authResult.getPrincipal();
+        String username = userDetails.getUser().getName();
+        UserRoleEnum role = userDetails.getUser().getRole();
+
+        String token = jwtUtil.createToken(username, role);
 
         log.info("[JwtAuthenticationFilter] token : " + token);
 
