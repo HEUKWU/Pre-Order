@@ -43,9 +43,7 @@ public class WishlistService {
         Wishlist wishlist = getWishlist(user);
         List<WishlistProduct> wishlistProducts = wishlist.getWishlistProducts();
 
-        List<WishlistResponseDto> wishlistResponseDtoList = wishlistProducts.stream().map(WishlistResponseDto::of).toList();
-
-        return wishlistResponseDtoList;
+        return wishlistProducts.stream().map(WishlistResponseDto::of).toList();
     }
 
     @Transactional
@@ -59,6 +57,7 @@ public class WishlistService {
         return WishlistResponseDto.of(wishlistProduct);
     }
 
+    // TODO : 장바구니 원장 생성은 유저 회원가입시에 처리한다.
     private Wishlist getWishlist(User user) {
         Optional<Wishlist> optionalWishlist = wishlistRepository.findWishlistByUserId(user.getId());
 

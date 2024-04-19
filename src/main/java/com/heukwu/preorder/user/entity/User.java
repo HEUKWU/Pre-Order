@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+// TODO : jpa convert 붙여서 encrypt, decrypt 로직 지우기
 @Entity(name = "users")
 @Getter
 @NoArgsConstructor

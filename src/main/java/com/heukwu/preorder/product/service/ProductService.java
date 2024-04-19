@@ -17,11 +17,11 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    // TODO : 검색조건, 페이징.
     public List<ProductResponseDto> getProductList() {
         List<Product> productList = productRepository.findAll();
-        List<ProductResponseDto> productResponseDtoList = productList.stream().map(ProductResponseDto::of).toList();
 
-        return productResponseDtoList;
+        return productList.stream().map(ProductResponseDto::of).toList();
     }
 
     public ProductResponseDto getProduct(Long productId) {

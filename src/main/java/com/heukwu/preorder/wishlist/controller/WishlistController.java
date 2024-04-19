@@ -21,20 +21,20 @@ public class WishlistController {
     public ResponseDto<WishlistResponseDto> addWishlist(@RequestBody WishlistRequestDto.Create requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         WishlistResponseDto wishlistResponseDto = wishlistService.addWishlist(requestDto, userDetails.getUser());
 
-        return ResponseDto.of(wishlistResponseDto);
+        return ResponseDto.success(wishlistResponseDto);
     }
 
     @GetMapping("/wishlist")
     public ResponseDto<List<WishlistResponseDto>> getUserWishlist(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<WishlistResponseDto> wishlistResponseDtoList = wishlistService.getUserWishlist(userDetails.getUser());
 
-        return ResponseDto.of(wishlistResponseDtoList);
+        return ResponseDto.success(wishlistResponseDtoList);
     }
 
     @PutMapping("/wishlist")
     public ResponseDto<WishlistResponseDto> updateWishlist(@RequestBody WishlistRequestDto.Update requestDto) {
         WishlistResponseDto wishlistResponseDto = wishlistService.updateWishlist(requestDto);
 
-        return ResponseDto.of(wishlistResponseDto);
+        return ResponseDto.success(wishlistResponseDto);
     }
 }

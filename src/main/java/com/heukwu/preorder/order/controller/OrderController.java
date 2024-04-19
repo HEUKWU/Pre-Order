@@ -1,6 +1,5 @@
 package com.heukwu.preorder.order.controller;
 
-import com.heukwu.preorder.common.SuccessMessage;
 import com.heukwu.preorder.common.dto.ResponseDto;
 import com.heukwu.preorder.common.security.UserDetailsImpl;
 import com.heukwu.preorder.order.dto.OrderRequestDto;
@@ -22,34 +21,34 @@ public class OrderController {
     public ResponseDto<OrderResponseDto> orderProduct(@RequestBody OrderRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         OrderResponseDto orderResponseDto = orderService.orderProduct(requestDto, userDetails.getUser());
 
-        return ResponseDto.of(orderResponseDto);
+        return ResponseDto.success(orderResponseDto);
     }
 
     @GetMapping("/order")
     public ResponseDto<List<OrderResponseDto>> getUserOrderInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<OrderResponseDto> userOrderInfo = orderService.getUserOrderInfo(userDetails.getUser());
 
-        return ResponseDto.of(userOrderInfo);
+        return ResponseDto.success(userOrderInfo);
     }
 
     @PostMapping("/order-wishlist")
     public ResponseDto<List<OrderResponseDto>> orderWishlist(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         List<OrderResponseDto> orderResponseDtoList = orderService.orderWishlist(userDetails.getUser());
 
-        return ResponseDto.of(orderResponseDtoList);
+        return ResponseDto.success(orderResponseDtoList);
     }
 
     @DeleteMapping("/order")
-    public ResponseDto<String> cancelOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto<Boolean> cancelOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         orderService.cancelOrder(userDetails.getUser());
 
-        return ResponseDto.of(SuccessMessage.CANCEL_ORDER.getMessage());
+        return ResponseDto.success();
     }
 
     @PutMapping("/order")
-    public ResponseDto<String> returnOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto<Boolean> returnOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         orderService.returnOrder(userDetails.getUser());
 
-        return ResponseDto.of(SuccessMessage.RETURN_ORDER.getMessage());
+        return ResponseDto.success();
     }
 }

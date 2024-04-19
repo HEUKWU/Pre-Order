@@ -29,6 +29,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EncryptUtil encryptor;
 
+    // TODO : 여기서도 email 인증되었는지 확인 필요
     public void signup(UserRequestDto.Signup requestDto) {
         Optional<User> findUser = userRepository.findUserByUsername(requestDto.getUsername());
         if (findUser.isPresent()) {
@@ -86,6 +87,7 @@ public class UserService {
         findUser.updatePhoneNumber(phoneNumber);
     }
 
+    // TODO : 패스워드 검증 필요. 같은 패스워드. 이전 비밀번호도 받아서 검증.
     @Transactional
     public void updatePassword(UserRequestDto.Password password, User user) {
         User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
@@ -105,14 +107,12 @@ public class UserService {
         String email = encryptor.decrypt(findUser.getEmail());
         String address = encryptor.decrypt(findUser.getAddress());
 
-        MyPageResponseDto responseDto = MyPageResponseDto.builder()
+        return MyPageResponseDto.builder()
                 .name(name)
                 .username(findUser.getUsername())
                 .email(email)
                 .address(address)
                 .phoneNumber(findUser.getPhoneNumber())
                 .build();
-
-        return responseDto;
     }
 }

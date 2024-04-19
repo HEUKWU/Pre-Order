@@ -22,7 +22,7 @@ public class JwtUtil {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final String AUTHORIZATION_KEY = "auth";
 
-    private final long TOKEN_TIME = 60 * 60 * 1000L;
+    private static final long TOKEN_TIME = 60 * 60 * 1000L;
 
     @Value("${jwt.secret.key}")
     private String secretKey;
@@ -62,14 +62,14 @@ public class JwtUtil {
             Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
 
             return true;
-        } catch (SecurityException | MalformedJwtException | SignatureException e) {
-            log.error("Invalid JWT signature");
+        } catch (SecurityException | MalformedJwtException e) {
+            log.error("Invalid JWT signature", e);
         } catch (ExpiredJwtException e) {
-            log.error("Expired JWT token");
+            log.error("Expired JWT token", e);
         } catch (UnsupportedJwtException e) {
-            log.error("Unsupported JWT token");
+            log.error("Unsupported JWT token", e);
         } catch (IllegalArgumentException e) {
-            log.error("JWT claims is empty");
+            log.error("JWT claims is empty", e);
         }
 
         return false;

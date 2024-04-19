@@ -2,16 +2,14 @@ package com.heukwu.preorder.wishlist.entity;
 
 import com.heukwu.preorder.product.entity.Product;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
+// TODO : 상태를 둬서 soft detele.
 @Entity
 @Builder
 @AllArgsConstructor
 @Getter
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WishlistProduct {
 
     @Id

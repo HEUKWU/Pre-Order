@@ -5,13 +5,11 @@ import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.common.util.EncryptUtil;
 import com.heukwu.preorder.email.dto.EmailRequestDto;
-import com.heukwu.preorder.email.dto.EmailResponseDto;
 import com.heukwu.preorder.email.entity.Email;
 import com.heukwu.preorder.email.repository.EmailRepository;
 import com.heukwu.preorder.user.repository.UserRepository;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
-import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -32,7 +30,7 @@ public class EmailService {
     private final EncryptUtil encryptor;
     private final JavaMailSender mailSender;
 
-    @Transactional
+    // TODO : 이메일 보내는 거는 async로 변경. 이메일 정보는 원장에 CREATED 상태로 저장하고 나감.
     public void sendVerificationEmail(EmailRequestDto.SendEmail requestDto) {
         checkEmailDuplicate(requestDto.getEmail());
 
@@ -82,6 +80,7 @@ public class EmailService {
         }
     }
 
+    // TODO : email.status = DONE
     public void verificationCode(EmailRequestDto.Code requestDto) {
         String encryptedEmail = encryptor.encrypt(requestDto.getEmail());
 

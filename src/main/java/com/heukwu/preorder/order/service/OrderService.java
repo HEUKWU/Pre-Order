@@ -19,11 +19,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -42,10 +40,7 @@ public class OrderService {
 
         // 주문으로 인한 수량 감소
         int quantity = requestDto.getQuantity();
-        product.decreaseQuantity(quantity);
-
-        // 장바구니 상품 처리
-        orderInWishlist(user, product);
+        product.decreaseQuantity(quantity); // 제고 관리 레디스 동시성 처리
 
         Order order = Order.builder()
                 .quantity(quantity)
@@ -60,25 +55,10 @@ public class OrderService {
         return OrderResponseDto.of(order);
     }
 
-    private void orderInWishlist(User user, Product product) {
-        Optional<Wishlist> optionalWishlist = wishlistRepository.findWishlistByUserId(user.getId());
-        if (optionalWishlist.isPresent()) {
-            Wishlist wishlist = optionalWishlist.get();
-            Optional<WishlistProduct> optionalWishlistProduct = wishlistProductRepository.findWishlistProductByWishlistIdAndProductId(wishlist.getId(), product.getId());
-
-            // 장바구니에 있는 상품 삭제 처리
-            if (optionalWishlistProduct.isPresent()) {
-                WishlistProduct wishlistProduct = optionalWishlistProduct.get();
-                wishlistProductRepository.delete(wishlistProduct);
-            }
-        }
-    }
-
     public List<OrderResponseDto> getUserOrderInfo(User user) {
         List<Order> orderList = orderRepository.findAllByUserId(user.getId());
-        List<OrderResponseDto> orderResposeDtoList = orderList.stream().map(OrderResponseDto::of).toList();
 
-        return orderResposeDtoList;
+        return orderList.stream().map(OrderResponseDto::of).toList();
     }
 
     @Transactional
@@ -90,9 +70,7 @@ public class OrderService {
         List<WishlistProduct> wishlistProducts = wishlist.getWishlistProducts();
 
         // 주문 생성
-        List<OrderResponseDto> orderResponseDtoList = createOrder(user, wishlistProducts);
-
-        return orderResponseDtoList;
+        return createOrder(user, wishlistProducts);
     }
 
     private List<OrderResponseDto> createOrder(User user, List<WishlistProduct> wishlistProducts) {
@@ -115,7 +93,7 @@ public class OrderService {
 
             orderRepository.save(order);
             // 장바구니 상품 삭제
-            wishlistProductRepository.delete(wishlistProduct);
+            wishlistProductRepository.delete(wishlistProduct); // TODO soft delete
             orderResponseDtoList.add(OrderResponseDto.of(order));
         }
 
@@ -128,11 +106,12 @@ public class OrderService {
 
         for (Order order : orderList) {
             // 배송이 시작되었다면 취소 불가
-            if (order.getStatus() != OrderStatus.CREATED) {
+            if (order.isNotCancelable()) {
                 throw new BusinessException(ErrorMessage.CANNOT_CANCEL_ORDER);
             }
 
-            order.updateStatus(OrderStatus.CANCELED);
+            order.cancelOrder();
+
             // 상품 재고 복구
             Product product = order.getProduct();
             product.increaseQuantity(order.getQuantity());
@@ -143,14 +122,15 @@ public class OrderService {
     public void returnOrder(User user) {
         List<Order> orderList = orderRepository.findAllByUserId(user.getId());
 
-        for (Order order : orderList) {
-            // 배송이 완료되지 않았거나 배송완료 후 하루 이상 지나면 반품 불가
-            if (order.getStatus() != OrderStatus.COMPLETE || LocalDate.now().isAfter(order.getModifiedAt().plusDays(1))) {
-                throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER);
-            }
+        long notReturnableCount = orderList.stream()
+                .filter(Order::isNotReturnable)
+                .count();
 
-            order.updateStatus(OrderStatus.RETURNING);
+        if (notReturnableCount > 0) {
+            throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER);
         }
+
+        orderList.forEach(Order::returnOrder);
     }
 
     // 주문 상태 변경

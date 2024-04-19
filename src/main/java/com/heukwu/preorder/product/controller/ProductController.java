@@ -19,20 +19,20 @@ public class ProductController {
     public ResponseDto<List<ProductResponseDto>> getProductList() {
         List<ProductResponseDto> productResponseDtoList = productService.getProductList();
 
-        return ResponseDto.of(productResponseDtoList);
+        return ResponseDto.success(productResponseDtoList);
     }
 
     @GetMapping("/product/{productId}")
     public ResponseDto<ProductResponseDto> getProduct(@PathVariable Long productId) {
         ProductResponseDto productResponseDto = productService.getProduct(productId);
 
-        return ResponseDto.of(productResponseDto);
+        return ResponseDto.success(productResponseDto);
     }
 
     @PostMapping("/product")
     public ResponseDto<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto) {
         ProductResponseDto productResponseDto = productService.createProduct(requestDto);
 
-        return ResponseDto.of(productResponseDto);
+        return ResponseDto.success(productResponseDto);
     }
 }

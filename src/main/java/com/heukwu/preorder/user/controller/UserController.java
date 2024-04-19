@@ -1,6 +1,5 @@
 package com.heukwu.preorder.user.controller;
 
-import com.heukwu.preorder.common.SuccessMessage;
 import com.heukwu.preorder.common.dto.ResponseDto;
 import com.heukwu.preorder.common.security.UserDetailsImpl;
 import com.heukwu.preorder.user.dto.MyPageResponseDto;
@@ -20,10 +19,10 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/user/signup")
-    public ResponseDto<String> signup(@RequestBody @Validated UserRequestDto.Signup requestDto) {
+    public ResponseDto<Boolean> signup(@RequestBody @Validated UserRequestDto.Signup requestDto) {
         userService.signup(requestDto);
 
-        return ResponseDto.of(SuccessMessage.SIGNUP.getMessage());
+        return ResponseDto.success();
     }
 
     @GetMapping("/user/logout")
@@ -32,30 +31,30 @@ public class UserController {
     }
 
     @PutMapping("/user/address")
-    public ResponseDto<String> updateAddress(@RequestParam @NotBlank String address, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto<Boolean> updateAddress(@RequestParam @NotBlank String address, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.updateAddress(address, userDetails.getUser());
 
-        return ResponseDto.of(SuccessMessage.UPDATE_ADDRESS.getMessage());
+        return ResponseDto.success();
     }
 
     @PutMapping("/user/phone")
-    public ResponseDto<String> updatePhoneNumber(@RequestParam @NotBlank String phoneNumber, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto<Boolean> updatePhoneNumber(@RequestParam @NotBlank String phoneNumber, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.updatePhoneNumber(phoneNumber, userDetails.getUser());
 
-        return ResponseDto.of(SuccessMessage.UPDATE_PHONE_NUMBER.getMessage());
+        return ResponseDto.success();
     }
 
     @PutMapping("/user/password")
-    public ResponseDto<String> updatePassword(@RequestBody @Validated UserRequestDto.Password password, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ResponseDto<Boolean> updatePassword(@RequestBody @Validated UserRequestDto.Password password, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.updatePassword(password, userDetails.getUser());
 
-        return ResponseDto.of(SuccessMessage.UPDATE_PASSWORD.getMessage());
+        return ResponseDto.success();
     }
 
     @GetMapping("/user")
     public ResponseDto<MyPageResponseDto> getMyPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         MyPageResponseDto MyPageResponseDto = userService.getMyPage(userDetails.getUser());
 
-        return ResponseDto.of(MyPageResponseDto);
+        return ResponseDto.success(MyPageResponseDto);
     }
 }

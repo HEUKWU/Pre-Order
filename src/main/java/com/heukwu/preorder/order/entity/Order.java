@@ -49,4 +49,24 @@ public class Order {
     public void updateStatus(OrderStatus status) {
         this.status = status;
     }
+
+    public boolean isNotCancelable() {
+        return this.status != OrderStatus.CREATED;
+    }
+
+    public void cancelOrder() {
+        this.status = OrderStatus.CANCELED;
+    }
+
+    public boolean isNotReturnable() {
+        boolean isReturnableStatus = this.status != OrderStatus.COMPLETE;
+        boolean isReturnableDate = LocalDate.now().isAfter(this.modifiedAt.plusDays(1));
+        return isReturnableDate && isReturnableStatus;
+    }
+
+    public void returnOrder() {
+        this.status = OrderStatus.RETURNING;
+    }
+
+
 }

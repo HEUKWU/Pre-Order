@@ -1,7 +1,7 @@
 package com.heukwu.preorder.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.heukwu.preorder.common.SuccessMessage;
+import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.jwt.JwtUtil;
 import com.heukwu.preorder.user.dto.UserRequestDto;
 import com.heukwu.preorder.user.entity.UserRoleEnum;
@@ -12,6 +12,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.io.IOException;
@@ -56,17 +57,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.TEXT_PLAIN_VALUE);
-        response.getWriter().write(SuccessMessage.LOGIN.getMessage());
+        response.getWriter().write("true");
         response.addHeader(JwtUtil.AUTHORIZATION_HEADER, token);
     }
 
     @Override
-    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, org.springframework.security.core.AuthenticationException failed) {
+    protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) {
         try {
             response.setContentType("application/json;charset=UTF-8");
             response.setCharacterEncoding("UTF-8");
             response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-            response.getWriter().write("유저 이름 및 패스워드를 확인해주세요.");
+            response.getWriter().write(ErrorMessage.WRONG_ID_PW.getMessage());
             response.getWriter().flush();
             response.getWriter().close();
         } catch (IOException e) {
