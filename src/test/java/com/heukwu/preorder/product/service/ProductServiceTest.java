@@ -1,5 +1,6 @@
 package com.heukwu.preorder.product.service;
 
+import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.product.dto.ProductResponseDto;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -58,5 +60,15 @@ class ProductServiceTest {
         //then
         assertThat(result.getName()).isEqualTo("Product");
         assertThat(result.getDescription()).isEqualTo("Description");
+    }
+
+    @Test
+    @DisplayName("올바르지 않은 상품 id로 조회시 예외가 발생한다.")
+    public void getProductNotExist() {
+        //given
+        when(productRepository.findById(1L)).thenReturn(Optional.empty());
+
+        //when, then
+        assertThatThrownBy(() -> productService.getProduct(1L)).isInstanceOf(NotFoundException.class).hasMessage("해당 상품을 찾을 수 없습니다.");
     }
 }

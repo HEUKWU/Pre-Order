@@ -1,5 +1,6 @@
 package com.heukwu.preorder.wishlist.service;
 
+import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import com.heukwu.preorder.user.entity.User;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -134,5 +136,15 @@ class WishlistServiceTest {
 
         //then
         assertThat(result.getQuantity()).isEqualTo(5);
+    }
+
+    @Test
+    @DisplayName("올바르지 않은 장바구니 상품 id로 변경시 예외가 발생한다.")
+    public void updateWishlistProductNotExist() {
+        //given
+        when(wishlistProductRepository.findById(1L)).thenReturn(Optional.empty());
+        WishlistRequestDto.Update requestDto = WishlistRequestDto.Update.builder().wishlistProductId(1L).quantity(5).build();
+        //when, then
+        assertThatThrownBy(() -> wishlistService.updateWishlist(requestDto)).isInstanceOf(NotFoundException.class).hasMessage("해당 장바구니 상품을 찾을 수 없습니다.");
     }
 }
