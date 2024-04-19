@@ -3,6 +3,7 @@ package com.heukwu.preorder.user.service;
 import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
+import com.heukwu.preorder.common.util.EncryptUtil;
 import com.heukwu.preorder.jwt.JwtUtil;
 import com.heukwu.preorder.user.dto.MyPageResponseDto;
 import com.heukwu.preorder.user.dto.UserRequestDto;
@@ -12,11 +13,14 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.encrypt.BytesEncryptor;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 @Service
@@ -25,12 +29,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-
-    @Value("${encrypt.password}")
-    String encryptPassword;
-
-    @Value("${encrypt.salt}")
-    String encryptSalt;
+    private final EncryptUtil encryptor;
 
     public void signup(UserRequestDto.Signup requestDto) {
         Optional<User> findUser = userRepository.findUserByUsername(requestDto.getUsername());
@@ -38,32 +37,27 @@ public class UserService {
             throw new BusinessException(ErrorMessage.DUPLICATE_USERNAME);
         }
 
-        if (userRepository.findUserByEmail(requestDto.getEmail()).isPresent()) {
+        String email = requestDto.getEmail();
+        String encryptedEmail = encryptor.encrypt(email);
+
+        if (userRepository.findUserByEmail(encryptedEmail).isPresent()) {
             throw new BusinessException(ErrorMessage.DUPLICATE_EMAIL);
         }
 
         String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
-        String encryptedName = encryptValue(requestDto.getName());
-        String encryptedAddress = encryptValue(requestDto.getAddress());
+        String encryptedName = encryptor.encrypt(requestDto.getName());
+        String encryptedAddress = encryptor.encrypt(requestDto.getAddress());
 
         User user = User.builder()
                 .username(requestDto.getUsername())
                 .password(encryptedPassword)
                 .name(encryptedName)
-                .email(requestDto.getEmail())
+                .email(encryptedEmail)
                 .address(encryptedAddress)
                 .phoneNumber(requestDto.getPhoneNumber())
                 .build();
 
         userRepository.save(user);
-    }
-
-    private String encryptValue(String value) {
-        return Encryptors.text(encryptPassword, encryptSalt).encrypt(value);
-    }
-
-    private String decryptValue(String value) {
-        return Encryptors.text(encryptPassword, encryptSalt).decrypt(value);
     }
 
     public void logout(HttpServletResponse response) {
@@ -82,7 +76,7 @@ public class UserService {
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
-        String encryptedAddress = encryptValue(address);
+        String encryptedAddress = encryptor.encrypt(address);
         findUser.updateAddress(encryptedAddress);
     }
 
@@ -110,13 +104,14 @@ public class UserService {
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
-        String name = decryptValue(findUser.getName());
-        String address = decryptValue(findUser.getAddress());
+        String name = encryptor.decrypt(findUser.getName());
+        String email = encryptor.decrypt(findUser.getEmail());
+        String address = encryptor.decrypt(findUser.getAddress());
 
         MyPageResponseDto responseDto = MyPageResponseDto.builder()
                 .name(name)
                 .username(findUser.getUsername())
-                .email(findUser.getEmail())
+                .email(email)
                 .address(address)
                 .phoneNumber(findUser.getPhoneNumber())
                 .build();
