@@ -83,9 +83,9 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         Product product = Product.builder().id(1L).build();
-        Order order1 = Order.builder().user(user).product(product).quantity(1).totalPrice(1000).build();
-        Order order2 = Order.builder().user(user).product(product).quantity(1).totalPrice(1000).build();
-        Order order3 = Order.builder().user(user).product(product).quantity(1).totalPrice(1000).build();
+        Order order1 = Order.builder().userId(user.getId()).product(product).quantity(1).totalPrice(1000).build();
+        Order order2 = Order.builder().userId(user.getId()).product(product).quantity(1).totalPrice(1000).build();
+        Order order3 = Order.builder().userId(user.getId()).product(product).quantity(1).totalPrice(1000).build();
 
         List<Order> orders = List.of(order1, order2, order3);
 

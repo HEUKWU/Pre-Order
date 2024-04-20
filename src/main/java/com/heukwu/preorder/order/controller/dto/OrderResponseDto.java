@@ -13,7 +13,7 @@ public record OrderResponseDto(
 ) {
         public static OrderResponseDto of(Order order) {
         return OrderResponseDto.builder()
-                .userId(order.getUser().getId())
+                .userId(order.getUserId())
                 .productId(order.getProduct().getId())
                 .productName(order.getProduct().getName())
                 .quantity(order.getQuantity())

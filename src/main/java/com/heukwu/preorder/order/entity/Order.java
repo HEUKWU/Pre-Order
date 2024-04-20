@@ -1,7 +1,6 @@
 package com.heukwu.preorder.order.entity;
 
 import com.heukwu.preorder.product.entity.Product;
-import com.heukwu.preorder.user.entity.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,9 +28,7 @@ public class Order {
     @Column(nullable = false)
     private int totalPrice;
 
-    @ManyToOne
-    @JoinColumn(name = "userId")
-    private User user;
+    private Long userId;
 
     @ManyToOne
     @JoinColumn(name = "productId")

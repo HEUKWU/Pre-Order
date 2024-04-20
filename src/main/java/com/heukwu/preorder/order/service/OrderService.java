@@ -43,7 +43,7 @@ public class OrderService {
         Order order = Order.builder()
                 .quantity(quantity)
                 .totalPrice(product.getPrice() * requestDto.quantity())
-                .user(user)
+                .userId(user.getId())
                 .product(product)
                 .status(OrderStatus.CREATED)
                 .build();
@@ -84,7 +84,7 @@ public class OrderService {
             Order order = Order.builder()
                     .quantity(wishlistProduct.getQuantity())
                     .totalPrice(wishlistProduct.getQuantity() * product.getPrice())
-                    .user(user)
+                    .userId(user.getId())
                     .product(product)
                     .status(OrderStatus.CREATED)
                     .build();
