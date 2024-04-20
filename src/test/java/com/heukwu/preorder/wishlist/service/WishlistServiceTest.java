@@ -41,17 +41,16 @@ class WishlistServiceTest {
     private WishlistService wishlistService;
 
     @Test
-    @DisplayName("장바구니에 상품을 저장했을시 결과의 회원 아이디와 상품 아이디, 수량은 저장한 회원의 아이디, 저장한 상품의 아이디, 수량과 같다.")
+    @DisplayName("장바구니에 상품을 저장했을시 결과의 상품 아이디, 수량은 저장한 상품의 아이디, 수량과 같다.")
     public void testAddWishlist() {
         //given
         WishListAddRequestDto requestDto = WishListAddRequestDto.builder().productId(1L).quantity(1).build();
-        User user = User.builder().id(1L).build();
+        Wishlist wishlist = Wishlist.builder().id(1L).build();
+        User user = User.builder().id(1L).wishListId(wishlist.getId()).build();
+        when(wishlistRepository.findById(user.getWishListId())).thenReturn(Optional.of(wishlist));
 
         Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).quantity(10).build();
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-
-        Wishlist wishlist = Wishlist.builder().id(1L).user(user).build();
-        when(wishlistRepository.findWishlistByUserId(user.getId())).thenReturn(Optional.of(wishlist));
 
         // 장바구니에 해당 상품이 이미 한개 저장되어있음
         when(wishlistProductRepository.findWishlistProductByWishlistIdAndProductIdAndDeletedFalse(wishlist.getId(), product.getId())).thenReturn(Optional.empty());
@@ -60,7 +59,6 @@ class WishlistServiceTest {
         WishlistResponseDto result = wishlistService.addWishlist(requestDto, user);
 
         //then
-        assertThat(result.userId()).isEqualTo(1L);
         assertThat(result.productId()).isEqualTo(1L);
         assertThat(result.quantity()).isEqualTo(1);
     }
@@ -71,13 +69,13 @@ class WishlistServiceTest {
         //given
         // 장바구니에 한개의 상품 저장
         WishListAddRequestDto requestDto = WishListAddRequestDto.builder().productId(1L).quantity(1).build();
-        User user = User.builder().id(1L).build();
+        Wishlist wishlist = Wishlist.builder().id(1L).build();
+        User user = User.builder().id(1L).wishListId(wishlist.getId()).build();
+
+        when(wishlistRepository.findById(user.getWishListId())).thenReturn(Optional.of(wishlist));
 
         Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).quantity(10).build();
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-
-        Wishlist wishlist = Wishlist.builder().id(1L).user(user).build();
-        when(wishlistRepository.findWishlistByUserId(user.getId())).thenReturn(Optional.of(wishlist));
 
         // 장바구니에 해당 상품이 이미 한개 저장되어있음
         WishlistProduct wishlistProduct = WishlistProduct.builder().id(1L).wishlist(wishlist).product(product).quantity(1).build();
@@ -87,7 +85,6 @@ class WishlistServiceTest {
         WishlistResponseDto result = wishlistService.addWishlist(requestDto, user);
 
         //then
-        assertThat(result.userId()).isEqualTo(1L);
         assertThat(result.productId()).isEqualTo(1L);
         // 한개가 이미 저장되어있는 상태에서 한개를 다시 저장했으니 수량은 두개가 된다.
         assertThat(result.quantity()).isEqualTo(2);
@@ -97,8 +94,8 @@ class WishlistServiceTest {
     @DisplayName("장바구니 조회시 반환 리스트의 개수는 장바구니에 저장되어있는 장바구니 상품의 개수와 같다.")
     public void testGetWishlist() {
         //given
-        User user = User.builder().id(1L).build();
-        Wishlist wishlist = Wishlist.builder().id(1L).user(user).build();
+        Wishlist wishlist = Wishlist.builder().id(1L).build();
+        User user = User.builder().id(1L).wishListId(wishlist.getId()).build();
         Product product1 = Product.builder().id(1L).build();
         Product product2 = Product.builder().id(1L).build();
         Product product3 = Product.builder().id(1L).build();
@@ -110,7 +107,7 @@ class WishlistServiceTest {
 
         wishlist = Wishlist.builder().wishlistProducts(wishlistProducts).build();
 
-        when(wishlistRepository.findWishlistByUserId(user.getId())).thenReturn(Optional.of(wishlist));
+        when(wishlistRepository.findById(user.getWishListId())).thenReturn(Optional.of(wishlist));
 
         //when
         List<WishlistResponseDto> result = wishlistService.getUserWishlist(user);
@@ -123,8 +120,7 @@ class WishlistServiceTest {
     @DisplayName("장바구니 상품 수량을 변경시 결과의 상품 수량은 변경시 요청한 상품 수량과 같다.")
     public void updateWishlist() {
         //given
-        User user = User.builder().id(1L).build();
-        Wishlist wishlist = Wishlist.builder().id(1L).user(user).build();
+        Wishlist wishlist = Wishlist.builder().id(1L).build();
         Product product = Product.builder().id(1L).build();
         WishlistProduct wishlistProduct = WishlistProduct.builder().id(1L).wishlist(wishlist).product(product).quantity(1).build();
 

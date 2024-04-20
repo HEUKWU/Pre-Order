@@ -13,6 +13,8 @@ import com.heukwu.preorder.user.controller.dto.SignupRequestDto;
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.user.entity.UserRoleEnum;
 import com.heukwu.preorder.user.repository.UserRepository;
+import com.heukwu.preorder.wishlist.entity.Wishlist;
+import com.heukwu.preorder.wishlist.repository.WishlistRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
@@ -30,6 +32,7 @@ public class UserService {
     private final EmailRepository emailRepository;
     private final PasswordEncoder passwordEncoder;
     private final EncryptUtil encryptor;
+    private final WishlistRepository wishlistRepository;
 
     public void signup(SignupRequestDto requestDto) {
         Optional<User> findUser = userRepository.findUserByUsername(requestDto.username());
@@ -47,6 +50,8 @@ public class UserService {
         String encryptedName = encryptor.encrypt(requestDto.name());
         String encryptedAddress = encryptor.encrypt(requestDto.address());
 
+        Wishlist wishlist = wishlistRepository.save(new Wishlist());
+
         User user = User.builder()
                 .username(requestDto.username())
                 .password(encryptedPassword)
@@ -55,6 +60,7 @@ public class UserService {
                 .email(encryptedEmail)
                 .address(encryptedAddress)
                 .phoneNumber(requestDto.phoneNumber())
+                .wishListId(wishlist.getId())
                 .build();
 
         userRepository.save(user);

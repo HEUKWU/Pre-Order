@@ -37,6 +37,8 @@ public class User {
     @Column(nullable = false)
     private String phoneNumber;
 
+    private Long wishListId;
+
     public void updateAddress(String address) {
         this.address = address;
     }

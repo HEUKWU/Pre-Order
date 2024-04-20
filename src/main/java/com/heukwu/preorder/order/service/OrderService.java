@@ -61,7 +61,7 @@ public class OrderService {
 
     @Transactional
     public List<OrderResponseDto> orderWishlist(User user) {
-        Wishlist wishlist = wishlistRepository.findWishlistByUserId(user.getId()).orElseThrow(
+        Wishlist wishlist = wishlistRepository.findById(user.getWishListId()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_WISHLIST)
         );
 

@@ -33,7 +33,9 @@ public class WishlistService {
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
         );
 
-        Wishlist wishlist = getWishlist(user);
+        Wishlist wishlist = wishlistRepository.findById(user.getWishListId()).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_WISHLIST)
+        );
 
         WishlistProduct wishlistProduct = createWishlistProduct(requestDto, wishlist, product);
 
@@ -41,7 +43,10 @@ public class WishlistService {
     }
 
     public List<WishlistResponseDto> getUserWishlist(User user) {
-        Wishlist wishlist = getWishlist(user);
+        Wishlist wishlist = wishlistRepository.findById(user.getWishListId()).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_WISHLIST)
+        );
+
         List<WishlistProduct> wishlistProducts = wishlist.getWishlistProducts();
 
         return wishlistProducts.stream().map(WishlistResponseDto::of).toList();
@@ -56,24 +61,6 @@ public class WishlistService {
         wishlistProduct.updateQuantity(requestDto.quantity());
 
         return WishlistResponseDto.of(wishlistProduct);
-    }
-
-    // TODO : 장바구니 원장 생성은 유저 회원가입시에 처리한다.
-    private Wishlist getWishlist(User user) {
-        Optional<Wishlist> optionalWishlist = wishlistRepository.findWishlistByUserId(user.getId());
-
-        Wishlist wishlist;
-        // 장바구니가 이미 존재한다면
-        if (optionalWishlist.isPresent()) {
-            // 그대로 반환
-            wishlist = optionalWishlist.get();
-        } else {
-            // 없다면 만들어서 반환
-            wishlist = Wishlist.builder().user(user).build();
-            wishlistRepository.save(wishlist);
-        }
-
-        return wishlist;
     }
 
     private WishlistProduct createWishlistProduct(WishListAddRequestDto requestDto, Wishlist wishlist, Product product) {

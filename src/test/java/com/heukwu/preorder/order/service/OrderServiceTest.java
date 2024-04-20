@@ -102,14 +102,14 @@ class OrderServiceTest {
     @DisplayName("장바구니 상품 일괄 주문시 반환 리스트의 개수는 장바구니 상품의 개수와 같다.")
     public void orderWishlist() {
         //given
-        User user = User.builder().id(1L).build();
-        Wishlist wishlist = Wishlist.builder().id(1L).user(user).build();
+        Wishlist wishlist = Wishlist.builder().id(1L).build();
+        User user = User.builder().id(1L).wishListId(wishlist.getId()).build();
         Product product = Product.builder().id(1L).build();
         WishlistProduct wishlistProduct1 = WishlistProduct.builder().id(1L).wishlist(wishlist).product(product).quantity(1).build();
         WishlistProduct wishlistProduct2 = WishlistProduct.builder().id(2L).wishlist(wishlist).product(product).quantity(1).build();
         wishlist = Wishlist.builder().wishlistProducts(List.of(wishlistProduct1, wishlistProduct2)).build();
 
-        when(wishlistRepository.findWishlistByUserId(user.getId())).thenReturn(Optional.of(wishlist));
+        when(wishlistRepository.findById(user.getWishListId())).thenReturn(Optional.of(wishlist));
 
         //when
         List<OrderResponseDto> result = orderService.orderWishlist(user);

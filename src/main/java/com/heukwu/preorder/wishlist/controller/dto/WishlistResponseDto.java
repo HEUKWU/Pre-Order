@@ -5,14 +5,11 @@ import lombok.Builder;
 
 @Builder
 public record WishlistResponseDto(
-        long userId,
         long productId,
-        int quantity,
-        String productPageUrl
+        int quantity
 ) {
     public static WishlistResponseDto of(WishlistProduct wishlistProduct) {
         return WishlistResponseDto.builder()
-                .userId(wishlistProduct.getWishlist().getUser().getId())
                 .productId(wishlistProduct.getProduct().getId())
                 .quantity(wishlistProduct.getQuantity())
                 .build();
