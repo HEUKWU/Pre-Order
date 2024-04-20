@@ -16,7 +16,7 @@ public record OrderResponseDto(
                 .userId(order.getUserId())
                 .productId(order.getOrderProduct().getProductId())
                 .productName(order.getOrderProduct().getName())
-                .quantity(order.getOrderProduct().getQuantity())
+                .quantity(order.getQuantity())
                 .totalPrice(order.getTotalPrice())
                 .build();
     }

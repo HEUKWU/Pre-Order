@@ -159,6 +159,7 @@ public class OrderService {
             // 주문 생성
             Order order = Order.builder()
                     .totalPrice(wishlistProduct.getQuantity() * product.getPrice())
+                    .quantity(wishlistProduct.getQuantity())
                     .userId(user.getId())
                     .orderProduct(orderProduct)
                     .status(OrderStatus.CREATED)

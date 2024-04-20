@@ -48,8 +48,11 @@ public class WishlistService {
         );
 
         List<WishlistProduct> wishlistProducts = wishlist.getWishlistProducts();
+        List<WishlistProduct> notDeletedWishlistProducts = wishlistProducts.stream()
+                .filter(wishlistProduct -> !wishlistProduct.isDeleted())
+                .toList();
 
-        return wishlistProducts.stream().map(WishlistResponseDto::of).toList();
+        return notDeletedWishlistProducts.stream().map(WishlistResponseDto::of).toList();
     }
 
     @Transactional

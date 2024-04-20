@@ -24,7 +24,7 @@ public class WishlistProduct {
     private int quantity;
 
     @Column
-    private boolean isDeleted = Boolean.FALSE;
+    private boolean deleted = Boolean.FALSE;
 
     public void increaseQuantity(int quantity) {
         this.quantity += quantity;
@@ -35,7 +35,7 @@ public class WishlistProduct {
     }
 
     public void delete() {
-        this.isDeleted = true;
+        this.deleted = true;
     }
 
     @Builder
