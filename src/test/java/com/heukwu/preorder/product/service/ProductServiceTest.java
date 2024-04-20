@@ -1,7 +1,7 @@
 package com.heukwu.preorder.product.service;
 
 import com.heukwu.preorder.common.exception.NotFoundException;
-import com.heukwu.preorder.product.dto.ProductResponseDto;
+import com.heukwu.preorder.product.controller.dto.ProductResponseDto;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -58,8 +58,8 @@ class ProductServiceTest {
         ProductResponseDto result = productService.getProduct(1L);
 
         //then
-        assertThat(result.getName()).isEqualTo("Product");
-        assertThat(result.getDescription()).isEqualTo("Description");
+        assertThat(result.name()).isEqualTo("Product");
+        assertThat(result.description()).isEqualTo("Description");
     }
 
     @Test

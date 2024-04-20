@@ -1,9 +1,10 @@
 package com.heukwu.preorder.user.controller;
 
-import com.heukwu.preorder.common.dto.ResponseDto;
+import com.heukwu.preorder.common.dto.ApiResponse;
 import com.heukwu.preorder.common.security.UserDetailsImpl;
-import com.heukwu.preorder.user.dto.MyPageResponseDto;
-import com.heukwu.preorder.user.dto.UserRequestDto;
+import com.heukwu.preorder.user.controller.dto.PasswordChangeRequestDto;
+import com.heukwu.preorder.user.controller.dto.MyPageResponseDto;
+import com.heukwu.preorder.user.controller.dto.SignupRequestDto;
 import com.heukwu.preorder.user.service.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.constraints.NotBlank;
@@ -19,10 +20,10 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/user/signup")
-    public ResponseDto<Boolean> signup(@RequestBody @Validated UserRequestDto.Signup requestDto) {
+    public ApiResponse<Boolean> signup(@RequestBody @Validated SignupRequestDto requestDto) {
         userService.signup(requestDto);
 
-        return ResponseDto.success();
+        return ApiResponse.success();
     }
 
     @GetMapping("/user/logout")
@@ -31,30 +32,30 @@ public class UserController {
     }
 
     @PutMapping("/user/address")
-    public ResponseDto<Boolean> updateAddress(@RequestParam @NotBlank String address, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<Boolean> updateAddress(@RequestParam @NotBlank String address, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.updateAddress(address, userDetails.getUser());
 
-        return ResponseDto.success();
+        return ApiResponse.success();
     }
 
     @PutMapping("/user/phone")
-    public ResponseDto<Boolean> updatePhoneNumber(@RequestParam @NotBlank String phoneNumber, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<Boolean> updatePhoneNumber(@RequestParam @NotBlank String phoneNumber, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.updatePhoneNumber(phoneNumber, userDetails.getUser());
 
-        return ResponseDto.success();
+        return ApiResponse.success();
     }
 
     @PutMapping("/user/password")
-    public ResponseDto<Boolean> updatePassword(@RequestBody @Validated UserRequestDto.Password password, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<Boolean> updatePassword(@RequestBody @Validated PasswordChangeRequestDto password, @AuthenticationPrincipal UserDetailsImpl userDetails) {
         userService.updatePassword(password, userDetails.getUser());
 
-        return ResponseDto.success();
+        return ApiResponse.success();
     }
 
     @GetMapping("/user")
-    public ResponseDto<MyPageResponseDto> getMyPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+    public ApiResponse<MyPageResponseDto> getMyPage(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         MyPageResponseDto MyPageResponseDto = userService.getMyPage(userDetails.getUser());
 
-        return ResponseDto.success(MyPageResponseDto);
+        return ApiResponse.success(MyPageResponseDto);
     }
 }

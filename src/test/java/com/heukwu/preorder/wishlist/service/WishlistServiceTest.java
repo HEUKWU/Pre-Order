@@ -4,8 +4,9 @@ import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import com.heukwu.preorder.user.entity.User;
-import com.heukwu.preorder.wishlist.dto.WishlistRequestDto;
-import com.heukwu.preorder.wishlist.dto.WishlistResponseDto;
+import com.heukwu.preorder.wishlist.controller.dto.WishListAddRequestDto;
+import com.heukwu.preorder.wishlist.controller.dto.WishListUpdateRequestDto;
+import com.heukwu.preorder.wishlist.controller.dto.WishlistResponseDto;
 import com.heukwu.preorder.wishlist.entity.Wishlist;
 import com.heukwu.preorder.wishlist.entity.WishlistProduct;
 import com.heukwu.preorder.wishlist.repository.WishlistProductRepository;
@@ -43,7 +44,7 @@ class WishlistServiceTest {
     @DisplayName("장바구니에 상품을 저장했을시 결과의 회원 아이디와 상품 아이디, 수량은 저장한 회원의 아이디, 저장한 상품의 아이디, 수량과 같다.")
     public void testAddWishlist() {
         //given
-        WishlistRequestDto.Create requestDto = WishlistRequestDto.Create.builder().productId(1L).quantity(1).build();
+        WishListAddRequestDto requestDto = WishListAddRequestDto.builder().productId(1L).quantity(1).build();
         User user = User.builder().id(1L).build();
 
         Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).quantity(10).build();
@@ -59,9 +60,9 @@ class WishlistServiceTest {
         WishlistResponseDto result = wishlistService.addWishlist(requestDto, user);
 
         //then
-        assertThat(result.getUserId()).isEqualTo(1L);
-        assertThat(result.getProductId()).isEqualTo(1L);
-        assertThat(result.getQuantity()).isEqualTo(1);
+        assertThat(result.userId()).isEqualTo(1L);
+        assertThat(result.productId()).isEqualTo(1L);
+        assertThat(result.quantity()).isEqualTo(1);
     }
 
     @Test
@@ -69,7 +70,7 @@ class WishlistServiceTest {
     public void testAddWishlistAgain() {
         //given
         // 장바구니에 한개의 상품 저장
-        WishlistRequestDto.Create requestDto = WishlistRequestDto.Create.builder().productId(1L).quantity(1).build();
+        WishListAddRequestDto requestDto = WishListAddRequestDto.builder().productId(1L).quantity(1).build();
         User user = User.builder().id(1L).build();
 
         Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).quantity(10).build();
@@ -86,10 +87,10 @@ class WishlistServiceTest {
         WishlistResponseDto result = wishlistService.addWishlist(requestDto, user);
 
         //then
-        assertThat(result.getUserId()).isEqualTo(1L);
-        assertThat(result.getProductId()).isEqualTo(1L);
+        assertThat(result.userId()).isEqualTo(1L);
+        assertThat(result.productId()).isEqualTo(1L);
         // 한개가 이미 저장되어있는 상태에서 한개를 다시 저장했으니 수량은 두개가 된다.
-        assertThat(result.getQuantity()).isEqualTo(2);
+        assertThat(result.quantity()).isEqualTo(2);
     }
 
     @Test
@@ -129,13 +130,13 @@ class WishlistServiceTest {
 
         when(wishlistProductRepository.findById(wishlistProduct.getId())).thenReturn(Optional.of(wishlistProduct));
 
-        WishlistRequestDto.Update requestDto = WishlistRequestDto.Update.builder().wishlistProductId(1L).quantity(5).build();
+        WishListUpdateRequestDto requestDto = WishListUpdateRequestDto.builder().wishlistProductId(1L).quantity(5).build();
 
         //when
         WishlistResponseDto result = wishlistService.updateWishlist(requestDto);
 
         //then
-        assertThat(result.getQuantity()).isEqualTo(5);
+        assertThat(result.quantity()).isEqualTo(5);
     }
 
     @Test
@@ -143,7 +144,7 @@ class WishlistServiceTest {
     public void updateWishlistProductNotExist() {
         //given
         when(wishlistProductRepository.findById(1L)).thenReturn(Optional.empty());
-        WishlistRequestDto.Update requestDto = WishlistRequestDto.Update.builder().wishlistProductId(1L).quantity(5).build();
+        WishListUpdateRequestDto requestDto = WishListUpdateRequestDto.builder().wishlistProductId(1L).quantity(5).build();
         //when, then
         assertThatThrownBy(() -> wishlistService.updateWishlist(requestDto)).isInstanceOf(NotFoundException.class).hasMessage("해당 장바구니 상품을 찾을 수 없습니다.");
     }

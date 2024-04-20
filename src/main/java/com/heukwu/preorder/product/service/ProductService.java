@@ -2,8 +2,8 @@ package com.heukwu.preorder.product.service;
 
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
-import com.heukwu.preorder.product.dto.ProductRequestDto;
-import com.heukwu.preorder.product.dto.ProductResponseDto;
+import com.heukwu.preorder.product.controller.dto.ProductRequestDto;
+import com.heukwu.preorder.product.controller.dto.ProductResponseDto;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
@@ -32,10 +32,10 @@ public class ProductService {
 
     public ProductResponseDto createProduct(ProductRequestDto requestDto) {
         Product product = Product.builder()
-                .name(requestDto.getName())
-                .description(requestDto.getDescription())
-                .price(requestDto.getPrice())
-                .quantity(requestDto.getQuantity())
+                .name(requestDto.name())
+                .description(requestDto.description())
+                .price(requestDto.price())
+                .quantity(requestDto.quantity())
                 .build();
 
         productRepository.save(product);

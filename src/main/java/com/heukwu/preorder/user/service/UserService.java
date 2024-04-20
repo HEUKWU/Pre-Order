@@ -7,8 +7,9 @@ import com.heukwu.preorder.common.util.EncryptUtil;
 import com.heukwu.preorder.email.entity.EmailVerificationStatusEnum;
 import com.heukwu.preorder.email.repository.EmailRepository;
 import com.heukwu.preorder.jwt.JwtUtil;
-import com.heukwu.preorder.user.dto.MyPageResponseDto;
-import com.heukwu.preorder.user.dto.UserRequestDto;
+import com.heukwu.preorder.user.controller.dto.MyPageResponseDto;
+import com.heukwu.preorder.user.controller.dto.PasswordChangeRequestDto;
+import com.heukwu.preorder.user.controller.dto.SignupRequestDto;
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.user.entity.UserRoleEnum;
 import com.heukwu.preorder.user.repository.UserRepository;
@@ -30,30 +31,30 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EncryptUtil encryptor;
 
-    public void signup(UserRequestDto.Signup requestDto) {
-        Optional<User> findUser = userRepository.findUserByUsername(requestDto.getUsername());
+    public void signup(SignupRequestDto requestDto) {
+        Optional<User> findUser = userRepository.findUserByUsername(requestDto.username());
         if (findUser.isPresent()) {
             throw new BusinessException(ErrorMessage.DUPLICATE_USERNAME);
         }
 
         // 인증된 이메일인지 검증
-        if (emailRepository.findByEmailAndVerificationStatus(encryptor.encrypt(requestDto.getEmail()), EmailVerificationStatusEnum.CREATED).isEmpty()) {
+        if (emailRepository.findByEmailAndVerificationStatus(encryptor.encrypt(requestDto.email()), EmailVerificationStatusEnum.CREATED).isEmpty()) {
             throw new BusinessException(ErrorMessage.UNAUTHENTICATED_EMAIL);
         }
 
-        String encryptedEmail = encryptor.encrypt(requestDto.getEmail());
-        String encryptedPassword = passwordEncoder.encode(requestDto.getPassword());
-        String encryptedName = encryptor.encrypt(requestDto.getName());
-        String encryptedAddress = encryptor.encrypt(requestDto.getAddress());
+        String encryptedEmail = encryptor.encrypt(requestDto.email());
+        String encryptedPassword = passwordEncoder.encode(requestDto.password());
+        String encryptedName = encryptor.encrypt(requestDto.name());
+        String encryptedAddress = encryptor.encrypt(requestDto.address());
 
         User user = User.builder()
-                .username(requestDto.getUsername())
+                .username(requestDto.username())
                 .password(encryptedPassword)
                 .role(UserRoleEnum.USER)
                 .name(encryptedName)
                 .email(encryptedEmail)
                 .address(encryptedAddress)
-                .phoneNumber(requestDto.getPhoneNumber())
+                .phoneNumber(requestDto.phoneNumber())
                 .build();
 
         userRepository.save(user);
@@ -89,24 +90,24 @@ public class UserService {
     }
 
     @Transactional
-    public void updatePassword(UserRequestDto.Password requestDto, User user) {
+    public void updatePassword(PasswordChangeRequestDto requestDto, User user) {
         User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
         verificationPassword(requestDto, user);
 
-        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
+        String encodedPassword = passwordEncoder.encode(requestDto.password());
         findUser.updatePassword(encodedPassword);
     }
 
     // 기존 비밀번호 검증
-    private void verificationPassword(UserRequestDto.Password requestDto, User user) {
-        if (passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+    private void verificationPassword(PasswordChangeRequestDto requestDto, User user) {
+        if (passwordEncoder.matches(requestDto.password(), user.getPassword())) {
             throw new BusinessException(ErrorMessage.WRONG_PASSWORD);
         }
 
-        if (passwordEncoder.matches(requestDto.getNewPassword(), user.getPassword())) {
+        if (passwordEncoder.matches(requestDto.newPassword(), user.getPassword())) {
             throw new BusinessException(ErrorMessage.SAME_PASSWORD);
         }
     }

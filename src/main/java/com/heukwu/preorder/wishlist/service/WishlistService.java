@@ -5,8 +5,9 @@ import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import com.heukwu.preorder.user.entity.User;
-import com.heukwu.preorder.wishlist.dto.WishlistRequestDto;
-import com.heukwu.preorder.wishlist.dto.WishlistResponseDto;
+import com.heukwu.preorder.wishlist.controller.dto.WishListAddRequestDto;
+import com.heukwu.preorder.wishlist.controller.dto.WishListUpdateRequestDto;
+import com.heukwu.preorder.wishlist.controller.dto.WishlistResponseDto;
 import com.heukwu.preorder.wishlist.entity.Wishlist;
 import com.heukwu.preorder.wishlist.entity.WishlistProduct;
 import com.heukwu.preorder.wishlist.repository.WishlistProductRepository;
@@ -27,8 +28,8 @@ public class WishlistService {
     private final WishlistRepository wishlistRepository;
 
     @Transactional
-    public WishlistResponseDto addWishlist(WishlistRequestDto.Create requestDto, User user) {
-        Product product = productRepository.findById(requestDto.getProductId()).orElseThrow(
+    public WishlistResponseDto addWishlist(WishListAddRequestDto requestDto, User user) {
+        Product product = productRepository.findById(requestDto.productId()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
         );
 
@@ -47,12 +48,12 @@ public class WishlistService {
     }
 
     @Transactional
-    public WishlistResponseDto updateWishlist(WishlistRequestDto.Update requestDto) {
-        WishlistProduct wishlistProduct = wishlistProductRepository.findById(requestDto.getWishlistProductId()).orElseThrow(
+    public WishlistResponseDto updateWishlist(WishListUpdateRequestDto requestDto) {
+        WishlistProduct wishlistProduct = wishlistProductRepository.findById(requestDto.wishlistProductId()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_WISHLIST_PRODUCT)
         );
 
-        wishlistProduct.updateQuantity(requestDto.getQuantity());
+        wishlistProduct.updateQuantity(requestDto.quantity());
 
         return WishlistResponseDto.of(wishlistProduct);
     }
@@ -75,7 +76,7 @@ public class WishlistService {
         return wishlist;
     }
 
-    private WishlistProduct createWishlistProduct(WishlistRequestDto.Create requestDto, Wishlist wishlist, Product product) {
+    private WishlistProduct createWishlistProduct(WishListAddRequestDto requestDto, Wishlist wishlist, Product product) {
         Optional<WishlistProduct> optionalWishlistProduct = wishlistProductRepository.findWishlistProductByWishlistIdAndProductIdAndDeletedFalse(wishlist.getId(), product.getId());
 
         WishlistProduct wishlistProduct;
@@ -83,12 +84,12 @@ public class WishlistService {
         if (optionalWishlistProduct.isPresent()) {
             wishlistProduct = optionalWishlistProduct.get();
             // 수량 업데이트
-            wishlistProduct.increaseQuantity(requestDto.getQuantity());
+            wishlistProduct.increaseQuantity(requestDto.quantity());
         } else {
             wishlistProduct = WishlistProduct.builder()
                     .wishlist(wishlist)
                     .product(product)
-                    .quantity(requestDto.getQuantity())
+                    .quantity(requestDto.quantity())
                     .build();
 
             wishlistProductRepository.save(wishlistProduct);

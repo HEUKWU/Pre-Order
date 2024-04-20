@@ -3,7 +3,7 @@ package com.heukwu.preorder.common.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.jwt.JwtUtil;
-import com.heukwu.preorder.user.dto.UserRequestDto;
+import com.heukwu.preorder.user.controller.dto.LoginRequestDto;
 import com.heukwu.preorder.user.entity.UserRoleEnum;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.http.HttpServletRequest;
@@ -30,12 +30,12 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) {
         try {
-            UserRequestDto.Login requestDto = new ObjectMapper().readValue(request.getInputStream(), UserRequestDto.Login.class);
+            LoginRequestDto requestDto = new ObjectMapper().readValue(request.getInputStream(), LoginRequestDto.class);
 
             return getAuthenticationManager().authenticate(
                     new UsernamePasswordAuthenticationToken(
-                            requestDto.getUsername(),
-                            requestDto.getPassword(),
+                            requestDto.username(),
+                            requestDto.password(),
                             null
                     )
             );

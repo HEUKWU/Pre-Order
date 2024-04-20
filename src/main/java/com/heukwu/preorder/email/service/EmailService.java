@@ -4,7 +4,8 @@ import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.common.util.EncryptUtil;
-import com.heukwu.preorder.email.dto.EmailRequestDto;
+import com.heukwu.preorder.email.controller.dto.EmailVerificationCodeRequestDto;
+import com.heukwu.preorder.email.controller.dto.VerificationCodeValidateRequestDto;
 import com.heukwu.preorder.email.entity.EmailVerificationHistory;
 import com.heukwu.preorder.email.entity.EmailVerificationStatusEnum;
 import com.heukwu.preorder.email.repository.EmailRepository;
@@ -28,11 +29,11 @@ public class EmailService {
     private final EncryptUtil encryptor;
     private final EmailSender emailSender;
 
-    public void sendVerificationEmail(EmailRequestDto.SendEmail requestDto) {
-        checkEmailDuplicate(requestDto.getEmail());
+    public void sendVerificationEmail(EmailVerificationCodeRequestDto requestDto) {
+        checkEmailDuplicate(requestDto.email());
 
-        EmailVerificationHistory emailVerificationHistory = getEmailVerificationHistory(requestDto.getEmail());
-        emailSender.sendEmail(requestDto.getEmail(), encryptor.decrypt(emailVerificationHistory.getCode()));
+        EmailVerificationHistory emailVerificationHistory = getEmailVerificationHistory(requestDto.email());
+        emailSender.sendEmail(requestDto.email(), encryptor.decrypt(emailVerificationHistory.getCode()));
 
         emailRepository.save(emailVerificationHistory);
     }
@@ -72,8 +73,8 @@ public class EmailService {
         }
     }
 
-    public void verificationCode(EmailRequestDto.Code requestDto) {
-        String encryptedEmail = encryptor.encrypt(requestDto.getEmail());
+    public void verificationCode(VerificationCodeValidateRequestDto requestDto) {
+        String encryptedEmail = encryptor.encrypt(requestDto.email());
 
         EmailVerificationHistory emailVerificationHistory = emailRepository.findEmailByEmail(encryptedEmail).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_EMAIL)
@@ -81,7 +82,7 @@ public class EmailService {
 
         String code = encryptor.decrypt(emailVerificationHistory.getCode());
 
-        if (!requestDto.getCode().equals(code)) {
+        if (!requestDto.code().equals(code)) {
             throw new BusinessException(ErrorMessage.INCORRECT_CODE);
         }
 

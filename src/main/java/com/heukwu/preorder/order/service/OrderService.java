@@ -3,8 +3,8 @@ package com.heukwu.preorder.order.service;
 import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
-import com.heukwu.preorder.order.dto.OrderRequestDto;
-import com.heukwu.preorder.order.dto.OrderResponseDto;
+import com.heukwu.preorder.order.controller.dto.OrderRequestDto;
+import com.heukwu.preorder.order.controller.dto.OrderResponseDto;
 import com.heukwu.preorder.order.entity.Order;
 import com.heukwu.preorder.order.entity.OrderStatus;
 import com.heukwu.preorder.order.repository.OrderRepository;
@@ -32,17 +32,17 @@ public class OrderService {
 
     @Transactional
     public OrderResponseDto orderProduct(OrderRequestDto requestDto, User user) {
-        Product product = productRepository.findById(requestDto.getProductId()).orElseThrow(
+        Product product = productRepository.findById(requestDto.productId()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
         );
 
         // 주문으로 인한 수량 감소
-        int quantity = requestDto.getQuantity();
+        int quantity = requestDto.quantity();
         product.decreaseQuantity(quantity);
 
         Order order = Order.builder()
                 .quantity(quantity)
-                .totalPrice(product.getPrice() * requestDto.getQuantity())
+                .totalPrice(product.getPrice() * requestDto.quantity())
                 .user(user)
                 .product(product)
                 .status(OrderStatus.CREATED)

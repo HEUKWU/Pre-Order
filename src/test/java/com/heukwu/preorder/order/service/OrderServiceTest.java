@@ -1,8 +1,8 @@
 package com.heukwu.preorder.order.service;
 
 import com.heukwu.preorder.common.exception.NotFoundException;
-import com.heukwu.preorder.order.dto.OrderRequestDto;
-import com.heukwu.preorder.order.dto.OrderResponseDto;
+import com.heukwu.preorder.order.controller.dto.OrderRequestDto;
+import com.heukwu.preorder.order.controller.dto.OrderResponseDto;
 import com.heukwu.preorder.order.entity.Order;
 import com.heukwu.preorder.order.repository.OrderRepository;
 import com.heukwu.preorder.product.entity.Product;
@@ -59,7 +59,7 @@ class OrderServiceTest {
         OrderResponseDto result = orderService.orderProduct(requestDto, user);
 
         //then
-        assertThat(result.getTotalPrice()).isEqualTo(product.getPrice() * requestDto.getQuantity());
+        assertThat(result.totalPrice()).isEqualTo(product.getPrice() * requestDto.quantity());
         assertThat(product.getQuantity()).isEqualTo(9);
     }
 

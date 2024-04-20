@@ -1,7 +1,8 @@
 package com.heukwu.preorder.email.controller;
 
-import com.heukwu.preorder.common.dto.ResponseDto;
-import com.heukwu.preorder.email.dto.EmailRequestDto;
+import com.heukwu.preorder.common.dto.ApiResponse;
+import com.heukwu.preorder.email.controller.dto.EmailVerificationCodeRequestDto;
+import com.heukwu.preorder.email.controller.dto.VerificationCodeValidateRequestDto;
 import com.heukwu.preorder.email.service.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -16,16 +17,16 @@ public class EmailController {
     private final EmailService emailService;
 
     @PostMapping("/email")
-    public ResponseDto<Boolean> sendVerificationEmail(@RequestBody @Valid EmailRequestDto.SendEmail requestDto) {
+    public ApiResponse<Boolean> sendVerificationEmail(@RequestBody @Valid EmailVerificationCodeRequestDto requestDto) {
         emailService.sendVerificationEmail(requestDto);
 
-        return ResponseDto.success();
+        return ApiResponse.success();
     }
 
     @PostMapping("/email/auth")
-    public ResponseDto<Boolean> verificationEmail(@RequestBody EmailRequestDto.Code requestDto) {
+    public ApiResponse<Boolean> verificationEmail(@RequestBody VerificationCodeValidateRequestDto requestDto) {
         emailService.verificationCode(requestDto);
 
-        return ResponseDto.success();
+        return ApiResponse.success();
     }
 }
