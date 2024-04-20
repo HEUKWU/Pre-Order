@@ -6,7 +6,9 @@ import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.order.controller.dto.OrderRequestDto;
 import com.heukwu.preorder.order.controller.dto.OrderResponseDto;
 import com.heukwu.preorder.order.entity.Order;
+import com.heukwu.preorder.order.entity.OrderProduct;
 import com.heukwu.preorder.order.entity.OrderStatus;
+import com.heukwu.preorder.order.repository.OrderProductRepository;
 import com.heukwu.preorder.order.repository.OrderRepository;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
@@ -27,6 +29,7 @@ import java.util.List;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderProductRepository orderProductRepository;
     private final ProductRepository productRepository;
     private final WishlistRepository wishlistRepository;
 
@@ -36,15 +39,17 @@ public class OrderService {
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
         );
 
+        OrderProduct orderProduct = createOrderProduct(product);
+
         // 주문으로 인한 수량 감소
         int quantity = requestDto.quantity();
         product.decreaseQuantity(quantity);
 
         Order order = Order.builder()
-                .quantity(quantity)
                 .totalPrice(product.getPrice() * requestDto.quantity())
+                .quantity(quantity)
                 .userId(user.getId())
-                .product(product)
+                .orderProduct(orderProduct)
                 .status(OrderStatus.CREATED)
                 .build();
 
@@ -71,36 +76,6 @@ public class OrderService {
         return createOrder(user, wishlistProducts);
     }
 
-    private List<OrderResponseDto> createOrder(User user, List<WishlistProduct> wishlistProducts) {
-        List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
-
-        for (WishlistProduct wishlistProduct : wishlistProducts) {
-            // 장바구니 상품
-            Product product = productRepository.findById(wishlistProduct.getProductId()).orElseThrow(
-                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT));
-
-            // 주문에 따른 상품 수량 감소
-            product.decreaseQuantity(wishlistProduct.getQuantity());
-
-            // 주문 생성
-            Order order = Order.builder()
-                    .quantity(wishlistProduct.getQuantity())
-                    .totalPrice(wishlistProduct.getQuantity() * product.getPrice())
-                    .userId(user.getId())
-                    .product(product)
-                    .status(OrderStatus.CREATED)
-                    .build();
-
-            orderRepository.save(order);
-
-            // 장바구니 상품 삭제
-            wishlistProduct.delete();
-            orderResponseDtoList.add(OrderResponseDto.of(order));
-        }
-
-        return orderResponseDtoList;
-    }
-
     @Transactional
     public void cancelOrder(User user) {
         List<Order> orderList = orderRepository.findAllByUserId(user.getId());
@@ -114,7 +89,10 @@ public class OrderService {
             order.cancelOrder();
 
             // 상품 재고 복구
-            Product product = order.getProduct();
+            Product product = productRepository.findById(order.getOrderProduct().getProductId()).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
+            );
+
             product.increaseQuantity(order.getQuantity());
         }
     }
@@ -133,6 +111,7 @@ public class OrderService {
 
         orderList.forEach(Order::returnOrder);
     }
+
 
     // 주문 상태 변경
     @Transactional
@@ -155,10 +134,57 @@ public class OrderService {
 
         // 반품 완료 후 하루 지난 상품 재고 복구
         for (Order order : returnedOrders) {
-            Product product = order.getProduct();
+            Product product = productRepository.findById(order.getOrderProduct().getProductId()).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
+            );
 
             product.increaseQuantity(order.getQuantity());
             order.updateStatus(OrderStatus.RETURNED);
         }
+    }
+
+    private List<OrderResponseDto> createOrder(User user, List<WishlistProduct> wishlistProducts) {
+        List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
+
+        for (WishlistProduct wishlistProduct : wishlistProducts) {
+            // 장바구니 상품
+            Product product = productRepository.findById(wishlistProduct.getProductId()).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT));
+
+            // 주문에 따른 상품 수량 감소
+            product.decreaseQuantity(wishlistProduct.getQuantity());
+
+            OrderProduct orderProduct = createOrderProduct(product);
+
+            // 주문 생성
+            Order order = Order.builder()
+                    .totalPrice(wishlistProduct.getQuantity() * product.getPrice())
+                    .userId(user.getId())
+                    .orderProduct(orderProduct)
+                    .status(OrderStatus.CREATED)
+                    .build();
+
+            orderRepository.save(order);
+
+            // 장바구니 상품 삭제
+            wishlistProduct.delete();
+            orderResponseDtoList.add(OrderResponseDto.of(order));
+        }
+
+        return orderResponseDtoList;
+    }
+
+    private OrderProduct createOrderProduct(Product product) {
+        OrderProduct orderProduct = OrderProduct.builder()
+                .productId(product.getId())
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .quantity(product.getQuantity())
+                .build();
+
+        orderProductRepository.save(orderProduct);
+
+        return orderProduct;
     }
 }

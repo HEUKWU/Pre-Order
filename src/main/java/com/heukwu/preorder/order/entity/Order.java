@@ -1,6 +1,5 @@
 package com.heukwu.preorder.order.entity;
 
-import com.heukwu.preorder.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -23,16 +22,17 @@ public class Order {
     private Long id;
 
     @Column(nullable = false)
-    private int quantity;
+    private int totalPrice;
 
     @Column(nullable = false)
-    private int totalPrice;
+    private int quantity;
 
     private Long userId;
 
     @ManyToOne
-    @JoinColumn(name = "productId")
-    private Product product;
+    @JoinColumn(name = "orderProductId")
+    private OrderProduct orderProduct;
+
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
@@ -64,6 +64,4 @@ public class Order {
     public void returnOrder() {
         this.status = OrderStatus.RETURNING;
     }
-
-
 }

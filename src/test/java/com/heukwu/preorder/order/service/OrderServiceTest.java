@@ -4,6 +4,8 @@ import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.order.controller.dto.OrderRequestDto;
 import com.heukwu.preorder.order.controller.dto.OrderResponseDto;
 import com.heukwu.preorder.order.entity.Order;
+import com.heukwu.preorder.order.entity.OrderProduct;
+import com.heukwu.preorder.order.repository.OrderProductRepository;
 import com.heukwu.preorder.order.repository.OrderRepository;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
@@ -31,6 +33,9 @@ class OrderServiceTest {
 
     @Mock
     private OrderRepository orderRepository;
+
+    @Mock
+    private OrderProductRepository orderProductRepository;
 
     @Mock
     private ProductRepository productRepository;
@@ -83,9 +88,12 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         Product product = Product.builder().id(1L).build();
-        Order order1 = Order.builder().userId(user.getId()).product(product).quantity(1).totalPrice(1000).build();
-        Order order2 = Order.builder().userId(user.getId()).product(product).quantity(1).totalPrice(1000).build();
-        Order order3 = Order.builder().userId(user.getId()).product(product).quantity(1).totalPrice(1000).build();
+        OrderProduct orderProduct1 = OrderProduct.builder().id(1L).productId(product.getId()).build();
+        OrderProduct orderProduct2 = OrderProduct.builder().id(1L).productId(product.getId()).build();
+        OrderProduct orderProduct3 = OrderProduct.builder().id(1L).productId(product.getId()).build();
+        Order order1 = Order.builder().userId(user.getId()).orderProduct(orderProduct1).quantity(1).totalPrice(1000).build();
+        Order order2 = Order.builder().userId(user.getId()).orderProduct(orderProduct2).quantity(1).totalPrice(1000).build();
+        Order order3 = Order.builder().userId(user.getId()).orderProduct(orderProduct3).quantity(1).totalPrice(1000).build();
 
         List<Order> orders = List.of(order1, order2, order3);
 

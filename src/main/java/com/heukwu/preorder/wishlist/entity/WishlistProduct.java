@@ -1,8 +1,10 @@
 package com.heukwu.preorder.wishlist.entity;
 
-import com.heukwu.preorder.product.entity.Product;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Getter

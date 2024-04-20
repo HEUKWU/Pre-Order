@@ -14,9 +14,9 @@ public record OrderResponseDto(
         public static OrderResponseDto of(Order order) {
         return OrderResponseDto.builder()
                 .userId(order.getUserId())
-                .productId(order.getProduct().getId())
-                .productName(order.getProduct().getName())
-                .quantity(order.getQuantity())
+                .productId(order.getOrderProduct().getProductId())
+                .productName(order.getOrderProduct().getName())
+                .quantity(order.getOrderProduct().getQuantity())
                 .totalPrice(order.getTotalPrice())
                 .build();
     }
