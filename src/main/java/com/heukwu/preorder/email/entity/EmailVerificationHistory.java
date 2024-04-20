@@ -1,9 +1,6 @@
 package com.heukwu.preorder.email.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,7 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Getter
 @NoArgsConstructor
-public class Email {
+public class EmailVerificationHistory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,4 +20,11 @@ public class Email {
     private String email;
 
     private String code;
+
+    @Enumerated(value = EnumType.ORDINAL)
+    private EmailVerificationStatusEnum verificationStatus;
+
+    public void verified() {
+        verificationStatus = EmailVerificationStatusEnum.VERIFIED;
+    }
 }
