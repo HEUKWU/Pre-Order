@@ -17,9 +17,7 @@ public class WishlistProduct {
     @JoinColumn(name = "wishlistId")
     private Wishlist wishlist;
 
-    @ManyToOne
-    @JoinColumn(name = "productId")
-    private Product product;
+    private Long productId;
 
     private int quantity;
 
@@ -39,10 +37,10 @@ public class WishlistProduct {
     }
 
     @Builder
-    public WishlistProduct(Long id, Wishlist wishlist, Product product, int quantity) {
+    public WishlistProduct(Long id, Wishlist wishlist, Long productId, int quantity) {
         this.id = id;
         this.wishlist = wishlist;
-        this.product = product;
+        this.productId = productId;
         this.quantity = quantity;
     }
 }

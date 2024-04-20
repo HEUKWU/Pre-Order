@@ -3,7 +3,7 @@ package com.heukwu.preorder.common.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.ErrorResponse;
-import com.heukwu.preorder.jwt.JwtUtil;
+import com.heukwu.preorder.common.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

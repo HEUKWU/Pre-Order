@@ -10,7 +10,7 @@ public record WishlistResponseDto(
 ) {
     public static WishlistResponseDto of(WishlistProduct wishlistProduct) {
         return WishlistResponseDto.builder()
-                .productId(wishlistProduct.getProduct().getId())
+                .productId(wishlistProduct.getProductId())
                 .quantity(wishlistProduct.getQuantity())
                 .build();
     }

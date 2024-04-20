@@ -76,7 +76,9 @@ public class OrderService {
 
         for (WishlistProduct wishlistProduct : wishlistProducts) {
             // 장바구니 상품
-            Product product = wishlistProduct.getProduct();
+            Product product = productRepository.findById(wishlistProduct.getProductId()).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT));
+
             // 주문에 따른 상품 수량 감소
             product.decreaseQuantity(wishlistProduct.getQuantity());
 

@@ -1,4 +1,4 @@
-package com.heukwu.preorder.jwt;
+package com.heukwu.preorder.common.jwt;
 
 import com.heukwu.preorder.user.entity.UserRoleEnum;
 import io.jsonwebtoken.*;

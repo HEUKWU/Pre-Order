@@ -105,11 +105,12 @@ class OrderServiceTest {
         Wishlist wishlist = Wishlist.builder().id(1L).build();
         User user = User.builder().id(1L).wishListId(wishlist.getId()).build();
         Product product = Product.builder().id(1L).build();
-        WishlistProduct wishlistProduct1 = WishlistProduct.builder().id(1L).wishlist(wishlist).product(product).quantity(1).build();
-        WishlistProduct wishlistProduct2 = WishlistProduct.builder().id(2L).wishlist(wishlist).product(product).quantity(1).build();
+        WishlistProduct wishlistProduct1 = WishlistProduct.builder().id(1L).wishlist(wishlist).productId(product.getId()).quantity(1).build();
+        WishlistProduct wishlistProduct2 = WishlistProduct.builder().id(2L).wishlist(wishlist).productId(product.getId()).quantity(1).build();
         wishlist = Wishlist.builder().wishlistProducts(List.of(wishlistProduct1, wishlistProduct2)).build();
 
         when(wishlistRepository.findById(user.getWishListId())).thenReturn(Optional.of(wishlist));
+        when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         //when
         List<OrderResponseDto> result = orderService.orderWishlist(user);

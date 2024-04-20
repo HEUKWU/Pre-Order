@@ -78,7 +78,7 @@ class WishlistServiceTest {
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         // 장바구니에 해당 상품이 이미 한개 저장되어있음
-        WishlistProduct wishlistProduct = WishlistProduct.builder().id(1L).wishlist(wishlist).product(product).quantity(1).build();
+        WishlistProduct wishlistProduct = WishlistProduct.builder().id(1L).wishlist(wishlist).productId(product.getId()).quantity(1).build();
         when(wishlistProductRepository.findWishlistProductByWishlistIdAndProductIdAndDeletedFalse(wishlist.getId(), product.getId())).thenReturn(Optional.of(wishlistProduct));
 
         //when
@@ -99,9 +99,9 @@ class WishlistServiceTest {
         Product product1 = Product.builder().id(1L).build();
         Product product2 = Product.builder().id(1L).build();
         Product product3 = Product.builder().id(1L).build();
-        WishlistProduct wishlistProduct1 = WishlistProduct.builder().id(1L).wishlist(wishlist).product(product1).build();
-        WishlistProduct wishlistProduct2 = WishlistProduct.builder().id(2L).wishlist(wishlist).product(product2).build();
-        WishlistProduct wishlistProduct3 = WishlistProduct.builder().id(3L).wishlist(wishlist).product(product3).build();
+        WishlistProduct wishlistProduct1 = WishlistProduct.builder().id(1L).wishlist(wishlist).productId(product1.getId()).build();
+        WishlistProduct wishlistProduct2 = WishlistProduct.builder().id(2L).wishlist(wishlist).productId(product2.getId()).build();
+        WishlistProduct wishlistProduct3 = WishlistProduct.builder().id(3L).wishlist(wishlist).productId(product3.getId()).build();
 
         List<WishlistProduct> wishlistProducts = List.of(wishlistProduct1, wishlistProduct2, wishlistProduct3);
 
@@ -122,7 +122,7 @@ class WishlistServiceTest {
         //given
         Wishlist wishlist = Wishlist.builder().id(1L).build();
         Product product = Product.builder().id(1L).build();
-        WishlistProduct wishlistProduct = WishlistProduct.builder().id(1L).wishlist(wishlist).product(product).quantity(1).build();
+        WishlistProduct wishlistProduct = WishlistProduct.builder().id(1L).wishlist(wishlist).productId(product.getId()).quantity(1).build();
 
         when(wishlistProductRepository.findById(wishlistProduct.getId())).thenReturn(Optional.of(wishlistProduct));
 

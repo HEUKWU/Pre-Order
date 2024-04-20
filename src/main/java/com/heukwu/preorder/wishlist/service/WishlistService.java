@@ -75,7 +75,7 @@ public class WishlistService {
         } else {
             wishlistProduct = WishlistProduct.builder()
                     .wishlist(wishlist)
-                    .product(product)
+                    .productId(product.getId())
                     .quantity(requestDto.quantity())
                     .build();
 

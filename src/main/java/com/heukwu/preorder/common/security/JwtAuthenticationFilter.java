@@ -2,7 +2,7 @@ package com.heukwu.preorder.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.heukwu.preorder.common.exception.ErrorMessage;
-import com.heukwu.preorder.jwt.JwtUtil;
+import com.heukwu.preorder.common.jwt.JwtUtil;
 import com.heukwu.preorder.user.controller.dto.LoginRequestDto;
 import com.heukwu.preorder.user.entity.UserRoleEnum;
 import jakarta.servlet.FilterChain;

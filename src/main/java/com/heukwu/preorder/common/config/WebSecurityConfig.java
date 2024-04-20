@@ -1,6 +1,6 @@
 package com.heukwu.preorder.common.config;
 
-import com.heukwu.preorder.jwt.JwtUtil;
+import com.heukwu.preorder.common.jwt.JwtUtil;
 import com.heukwu.preorder.common.security.JwtAuthenticationFilter;
 import com.heukwu.preorder.common.security.JwtAuthorizationFilter;
 import com.heukwu.preorder.common.security.UserDetailsServiceImpl;

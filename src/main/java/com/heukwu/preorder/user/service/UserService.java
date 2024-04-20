@@ -6,7 +6,7 @@ import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.common.util.EncryptUtil;
 import com.heukwu.preorder.email.entity.EmailVerificationStatusEnum;
 import com.heukwu.preorder.email.repository.EmailRepository;
-import com.heukwu.preorder.jwt.JwtUtil;
+import com.heukwu.preorder.common.jwt.JwtUtil;
 import com.heukwu.preorder.user.controller.dto.MyPageResponseDto;
 import com.heukwu.preorder.user.controller.dto.PasswordChangeRequestDto;
 import com.heukwu.preorder.user.controller.dto.SignupRequestDto;
