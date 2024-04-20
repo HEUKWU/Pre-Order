@@ -5,6 +5,8 @@ import lombok.Getter;
 @Getter
 public enum ErrorMessage {
     WRONG_ID_PW("아이디와 비밀번호 확인이 필요합니다."),
+    WRONG_PASSWORD("비밀번호가 일치하지 않습니다."),
+    SAME_PASSWORD("새로운 비밀번호는 이전 비밀번호와 같을 수 없습니다."),
     NOT_FOUND_EMAIL("이메일을 찾을 수 없습니다."),
     INCORRECT_CODE("인증번호가 일치하지 않습니다."),
     UNAUTHENTICATED_EMAIL("이메일 인증이 필요합니다."),

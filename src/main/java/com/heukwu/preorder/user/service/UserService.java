@@ -4,6 +4,7 @@ import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.common.util.EncryptUtil;
+import com.heukwu.preorder.email.entity.EmailVerificationStatusEnum;
 import com.heukwu.preorder.email.repository.EmailRepository;
 import com.heukwu.preorder.jwt.JwtUtil;
 import com.heukwu.preorder.user.dto.MyPageResponseDto;
@@ -29,14 +30,14 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final EncryptUtil encryptor;
 
-    // TODO : 여기서도 email 인증되었는지 확인 필요
     public void signup(UserRequestDto.Signup requestDto) {
         Optional<User> findUser = userRepository.findUserByUsername(requestDto.getUsername());
         if (findUser.isPresent()) {
             throw new BusinessException(ErrorMessage.DUPLICATE_USERNAME);
         }
 
-        if (emailRepository.findEmailByEmail(encryptor.encrypt(requestDto.getEmail())).isEmpty()) {
+        // 인증된 이메일인지 검증
+        if (emailRepository.findByEmailAndVerificationStatus(encryptor.encrypt(requestDto.getEmail()), EmailVerificationStatusEnum.CREATED).isEmpty()) {
             throw new BusinessException(ErrorMessage.UNAUTHENTICATED_EMAIL);
         }
 
@@ -87,15 +88,27 @@ public class UserService {
         findUser.updatePhoneNumber(phoneNumber);
     }
 
-    // TODO : 패스워드 검증 필요. 같은 패스워드. 이전 비밀번호도 받아서 검증.
     @Transactional
-    public void updatePassword(UserRequestDto.Password password, User user) {
+    public void updatePassword(UserRequestDto.Password requestDto, User user) {
         User findUser = userRepository.findUserByUsername(user.getUsername()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_USER)
         );
 
-        String encodedPassword = passwordEncoder.encode(password.getPassword());
+        verificationPassword(requestDto, user);
+
+        String encodedPassword = passwordEncoder.encode(requestDto.getPassword());
         findUser.updatePassword(encodedPassword);
+    }
+
+    // 기존 비밀번호 검증
+    private void verificationPassword(UserRequestDto.Password requestDto, User user) {
+        if (passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new BusinessException(ErrorMessage.WRONG_PASSWORD);
+        }
+
+        if (passwordEncoder.matches(requestDto.getNewPassword(), user.getPassword())) {
+            throw new BusinessException(ErrorMessage.SAME_PASSWORD);
+        }
     }
 
     public MyPageResponseDto getMyPage(User user) {

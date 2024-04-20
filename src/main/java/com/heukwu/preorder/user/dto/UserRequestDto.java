@@ -39,5 +39,8 @@ public class UserRequestDto {
     public static class Password {
         @Pattern(regexp = "(?=.*?[a-zA-Z])(?=.*?\\d)(?=.*?[~!@#$%^&*()_+=\\-`]).{8,30}")
         private String password;
+
+        @Pattern(regexp = "(?=.*?[a-zA-Z])(?=.*?\\d)(?=.*?[~!@#$%^&*()_+=\\-`]).{8,30}")
+        private String newPassword;
     }
 }
