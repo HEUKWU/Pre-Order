@@ -92,8 +92,9 @@ public class OrderService {
                     .build();
 
             orderRepository.save(order);
+
             // 장바구니 상품 삭제
-            wishlistProductRepository.delete(wishlistProduct); // TODO soft delete
+            wishlistProduct.delete();
             orderResponseDtoList.add(OrderResponseDto.of(order));
         }
 

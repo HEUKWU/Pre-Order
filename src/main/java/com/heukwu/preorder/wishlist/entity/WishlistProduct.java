@@ -26,11 +26,18 @@ public class WishlistProduct {
 
     private int quantity;
 
+    @Column
+    private boolean isDeleted = Boolean.FALSE;
+
     public void increaseQuantity(int quantity) {
         this.quantity += quantity;
     }
 
     public void updateQuantity(int quantity) {
         this.quantity = quantity;
+    }
+
+    public void delete() {
+        this.isDeleted = true;
     }
 }
