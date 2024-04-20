@@ -4,10 +4,7 @@ import com.heukwu.preorder.product.entity.Product;
 import jakarta.persistence.*;
 import lombok.*;
 
-// TODO : 상태를 둬서 soft detele.
 @Entity
-@Builder
-@AllArgsConstructor
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class WishlistProduct {
@@ -39,5 +36,13 @@ public class WishlistProduct {
 
     public void delete() {
         this.isDeleted = true;
+    }
+
+    @Builder
+    public WishlistProduct(Long id, Wishlist wishlist, Product product, int quantity) {
+        this.id = id;
+        this.wishlist = wishlist;
+        this.product = product;
+        this.quantity = quantity;
     }
 }

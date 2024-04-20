@@ -13,7 +13,6 @@ import com.heukwu.preorder.product.repository.ProductRepository;
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.wishlist.entity.Wishlist;
 import com.heukwu.preorder.wishlist.entity.WishlistProduct;
-import com.heukwu.preorder.wishlist.repository.WishlistProductRepository;
 import com.heukwu.preorder.wishlist.repository.WishlistRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +28,6 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
-    private final WishlistProductRepository wishlistProductRepository;
     private final WishlistRepository wishlistRepository;
 
     @Transactional
@@ -40,7 +38,7 @@ public class OrderService {
 
         // 주문으로 인한 수량 감소
         int quantity = requestDto.getQuantity();
-        product.decreaseQuantity(quantity); // 제고 관리 레디스 동시성 처리
+        product.decreaseQuantity(quantity);
 
         Order order = Order.builder()
                 .quantity(quantity)

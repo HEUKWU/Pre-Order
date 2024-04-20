@@ -76,7 +76,7 @@ public class WishlistService {
     }
 
     private WishlistProduct createWishlistProduct(WishlistRequestDto.Create requestDto, Wishlist wishlist, Product product) {
-        Optional<WishlistProduct> optionalWishlistProduct = wishlistProductRepository.findWishlistProductByWishlistIdAndProductId(wishlist.getId(), product.getId());
+        Optional<WishlistProduct> optionalWishlistProduct = wishlistProductRepository.findWishlistProductByWishlistIdAndProductIdAndDeletedFalse(wishlist.getId(), product.getId());
 
         WishlistProduct wishlistProduct;
         // 해당 상품이 이미 장바구니에 있다면

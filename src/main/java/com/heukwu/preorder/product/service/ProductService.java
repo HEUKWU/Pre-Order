@@ -17,7 +17,6 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
-    // TODO : 검색조건, 페이징.
     public List<ProductResponseDto> getProductList() {
         List<Product> productList = productRepository.findAll();
 

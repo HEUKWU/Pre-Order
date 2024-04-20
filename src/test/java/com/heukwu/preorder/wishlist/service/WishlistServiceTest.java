@@ -53,7 +53,7 @@ class WishlistServiceTest {
         when(wishlistRepository.findWishlistByUserId(user.getId())).thenReturn(Optional.of(wishlist));
 
         // 장바구니에 해당 상품이 이미 한개 저장되어있음
-        when(wishlistProductRepository.findWishlistProductByWishlistIdAndProductId(wishlist.getId(), product.getId())).thenReturn(Optional.empty());
+        when(wishlistProductRepository.findWishlistProductByWishlistIdAndProductIdAndDeletedFalse(wishlist.getId(), product.getId())).thenReturn(Optional.empty());
 
         //when
         WishlistResponseDto result = wishlistService.addWishlist(requestDto, user);
@@ -80,7 +80,7 @@ class WishlistServiceTest {
 
         // 장바구니에 해당 상품이 이미 한개 저장되어있음
         WishlistProduct wishlistProduct = WishlistProduct.builder().id(1L).wishlist(wishlist).product(product).quantity(1).build();
-        when(wishlistProductRepository.findWishlistProductByWishlistIdAndProductId(wishlist.getId(), product.getId())).thenReturn(Optional.of(wishlistProduct));
+        when(wishlistProductRepository.findWishlistProductByWishlistIdAndProductIdAndDeletedFalse(wishlist.getId(), product.getId())).thenReturn(Optional.of(wishlistProduct));
 
         //when
         WishlistResponseDto result = wishlistService.addWishlist(requestDto, user);
