@@ -1,6 +1,7 @@
 package com.heukwu.preorder.order.controller.dto;
 
 import com.heukwu.preorder.order.entity.Order;
+import com.heukwu.preorder.order.entity.OrderStatus;
 import lombok.Builder;
 
 @Builder
@@ -9,7 +10,8 @@ public record OrderResponseDto(
         long productId,
         String productName,
         int quantity,
-        int totalPrice
+        int totalPrice,
+        OrderStatus orderStatus
 ) {
         public static OrderResponseDto of(Order order) {
         return OrderResponseDto.builder()
@@ -18,6 +20,7 @@ public record OrderResponseDto(
                 .productName(order.getOrderProduct().getName())
                 .quantity(order.getQuantity())
                 .totalPrice(order.getTotalPrice())
+                .orderStatus(order.getStatus())
                 .build();
     }
 }
