@@ -6,16 +6,18 @@ import jakarta.validation.constraints.Pattern;
 
 public record SignupRequestDto(
 
-        @NotBlank
+        @NotBlank(message = "아이디를 입력해주세요")
         String username,
 
-        @Pattern(regexp = "(?=.*?[a-zA-Z])(?=.*?\\d)(?=.*?[~!@#$%^&*()_+=\\-`]).{8,30}")
+        @NotBlank(message = "비밀번호를 입력해주세요")
+        @Pattern(regexp = "(?=.*?[a-zA-Z])(?=.*?\\d)(?=.*?[~!@#$%^&*()_+=\\-`]).{8,15}",
+                message = "비밀번호는 최소한 하나의 숫자, 문자, 특수문자 ~!@#$%^&*()_+=-`를 포함한 8글자 ~ 15글자여야 합니다.")
         String password,
 
-        @NotBlank
+        @NotBlank(message = "이름을 입력해주세요")
         String name,
 
-        @Email
+        @Email(message = "이메일 형식에 맞춰서 입력해주세요")
         String email,
 
         @NotBlank

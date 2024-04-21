@@ -53,7 +53,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String token = jwtUtil.createToken(username, role);
 
-        log.info("[JwtAuthenticationFilter] token : " + token);
+        log.info("[JwtAuthenticationFilter] token: {} ", token);
 
         response.setCharacterEncoding("UTF-8");
         response.setContentType(MediaType.TEXT_PLAIN_VALUE);
