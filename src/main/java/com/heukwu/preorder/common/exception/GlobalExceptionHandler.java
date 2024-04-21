@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> methodArgumentNotValidException(MethodArgumentNotValidException e) {
-        log.info("이ㅏㄹㄴ아ㅣ러ㅏㄴㅇ", e);
+        log.info("", e);
         ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), e.getMessage());
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(errorResponse);
