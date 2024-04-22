@@ -1,10 +1,12 @@
 package com.heukwu.preorder.order.service;
 
+import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.order.controller.dto.OrderRequestDto;
 import com.heukwu.preorder.order.controller.dto.OrderResponseDto;
 import com.heukwu.preorder.order.entity.Order;
 import com.heukwu.preorder.order.entity.OrderProduct;
+import com.heukwu.preorder.order.entity.OrderStatus;
 import com.heukwu.preorder.order.repository.OrderProductRepository;
 import com.heukwu.preorder.order.repository.OrderRepository;
 import com.heukwu.preorder.product.entity.Product;
@@ -12,7 +14,6 @@ import com.heukwu.preorder.product.repository.ProductRepository;
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.wishlist.entity.Wishlist;
 import com.heukwu.preorder.wishlist.entity.WishlistProduct;
-import com.heukwu.preorder.wishlist.repository.WishlistProductRepository;
 import com.heukwu.preorder.wishlist.repository.WishlistRepository;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -42,9 +44,6 @@ class OrderServiceTest {
 
     @Mock
     private WishlistRepository wishlistRepository;
-
-    @Mock
-    private WishlistProductRepository wishlistProductRepository;
 
     @InjectMocks
     private OrderService orderService;
@@ -125,5 +124,83 @@ class OrderServiceTest {
 
         //then
         assertThat(result.size()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("주문취소가 완료되면 주문의 상태가 취소됨으로 변경된다.")
+    public void cancelOrder() {
+        //given
+        User user = User.builder().id(1L).build();
+        Product product = Product.builder().id(1L).build();
+        OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(product.getId()).build();
+        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.CREATED).build();
+
+        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+
+        //when
+        orderService.cancelOrder(user);
+
+        //then
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
+    }
+
+    @Test
+    @DisplayName("배송이 시작되었다면 주문 취소가 불가능하다.")
+    public void cannotCancelOrder() {
+        //given
+        User user = User.builder().id(1L).build();
+        OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
+        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.SHIPPING).build();
+
+        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+
+        //when, then
+        assertThatThrownBy(() -> orderService.cancelOrder(user)).isInstanceOf(BusinessException.class).hasMessage("배송중에는 주문 취소가 불가능합니다.");
+    }
+
+    @Test
+    @DisplayName("반품 신청이 완료되면 주문 상태가 반품중으로 변경된다.")
+    public void returnOrder() {
+        //given
+        User user = User.builder().id(1L).build();
+        OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
+        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.COMPLETED).modifiedAt(LocalDate.now()).build();
+
+        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+
+        //when
+        orderService.returnOrder(user);
+
+        //then
+        assertThat(order.getStatus()).isEqualTo(OrderStatus.RETURNING);
+    }
+
+    @Test
+    @DisplayName("배송이 완료되지 않은 주문은 반품이 불가능하다.")
+    public void cannotReturnOrderStatus() {
+        //given
+        User user = User.builder().id(1L).build();
+        OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
+        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.SHIPPING).modifiedAt(LocalDate.now()).build();
+
+        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+
+        //when, then
+        assertThatThrownBy(() -> orderService.returnOrder(user)).isInstanceOf(BusinessException.class).hasMessage("배송이 완료되지 않은 상품은 반품이 불가능합니다.");
+    }
+
+    @Test
+    @DisplayName("배송완료 후 2일 이상 지난 주문은 반품이 불가능하다.")
+    public void cannotReturnOrderDate() {
+        //given
+        User user = User.builder().id(1L).build();
+        OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
+        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.COMPLETED).modifiedAt(LocalDate.now().minusDays(2)).build();
+
+        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+
+        //when, then
+        assertThatThrownBy(() -> orderService.returnOrder(user)).isInstanceOf(BusinessException.class).hasMessage("배송완료 후 2일 이상 지난 상품은 반품이 불가능합니다.");
     }
 }

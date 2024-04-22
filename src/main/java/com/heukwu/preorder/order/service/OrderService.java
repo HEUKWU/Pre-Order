@@ -101,15 +101,16 @@ public class OrderService {
     public void returnOrder(User user) {
         List<Order> orderList = orderRepository.findAllByUserId(user.getId());
 
-        long notReturnableCount = orderList.stream()
-                .filter(Order::isNotReturnable)
-                .count();
+        for (Order order : orderList) {
+            if (order.isNotReturnableStatus()) {
+                throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER_STATUS);
+            }
+            if (order.isNotReturnableDate()) {
+                throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER_DATE);
+            }
 
-        if (notReturnableCount > 0) {
-            throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER);
+            order.returnOrder();
         }
-
-        orderList.forEach(Order::returnOrder);
     }
 
 
@@ -127,7 +128,7 @@ public class OrderService {
 
         // 배송 시작 후 하루 지난 주문 배송완료 처리
         for (Order order : shippingOrders) {
-            order.updateStatus(OrderStatus.COMPLETE);
+            order.updateStatus(OrderStatus.COMPLETED);
         }
 
         List<Order> returnedOrders = orderRepository.findAllByStatusAndModifiedAtBefore(OrderStatus.RETURNING, LocalDateTime.now().minusDays(1));

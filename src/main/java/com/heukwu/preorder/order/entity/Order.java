@@ -57,10 +57,12 @@ public class Order {
         this.status = OrderStatus.CANCELED;
     }
 
-    public boolean isNotReturnable() {
-        boolean isReturnableStatus = this.status != OrderStatus.COMPLETE;
-        boolean isReturnableDate = LocalDate.now().isAfter(this.modifiedAt.plusDays(1));
-        return isReturnableDate && isReturnableStatus;
+    public boolean isNotReturnableStatus() {
+        return this.status != OrderStatus.COMPLETED;
+    }
+
+    public boolean isNotReturnableDate() {
+        return LocalDate.now().isAfter(this.modifiedAt.plusDays(1));
     }
 
     public void returnOrder() {
