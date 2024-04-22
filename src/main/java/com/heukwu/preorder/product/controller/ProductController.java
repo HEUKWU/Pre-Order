@@ -3,6 +3,7 @@ package com.heukwu.preorder.product.controller;
 import com.heukwu.preorder.common.dto.ApiResponse;
 import com.heukwu.preorder.product.controller.dto.ProductRequestDto;
 import com.heukwu.preorder.product.controller.dto.ProductResponseDto;
+import com.heukwu.preorder.product.controller.dto.ProductSearch;
 import com.heukwu.preorder.product.service.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,8 +21,8 @@ public class ProductController {
 
     @Operation(summary = "상품 목록 조회")
     @GetMapping("/product")
-    public ApiResponse<List<ProductResponseDto>> getProductList() {
-        List<ProductResponseDto> productResponseDtoList = productService.getProductList();
+    public ApiResponse<List<ProductResponseDto>> getProductList(ProductSearch search, @RequestParam int size, Long cursorId) {
+        List<ProductResponseDto> productResponseDtoList = productService.getProductList(search, size, cursorId);
 
         return ApiResponse.success(productResponseDtoList);
     }

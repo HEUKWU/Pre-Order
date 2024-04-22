@@ -11,6 +11,15 @@ public record ProductResponseDto(
         int price,
         int quantity
 ) {
+    public static ProductResponseDto toListResponseDto(Product product) {
+        return ProductResponseDto.builder()
+                .id(product.getId())
+                .name(product.getName())
+                .price(product.getPrice())
+                .quantity(product.getQuantity())
+                .build();
+    }
+
     public static ProductResponseDto of(Product product) {
         return ProductResponseDto.builder()
                 .id(product.getId())

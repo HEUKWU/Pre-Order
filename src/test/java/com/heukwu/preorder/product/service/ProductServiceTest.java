@@ -2,6 +2,7 @@ package com.heukwu.preorder.product.service;
 
 import com.heukwu.preorder.common.exception.NotFoundException;
 import com.heukwu.preorder.product.controller.dto.ProductResponseDto;
+import com.heukwu.preorder.product.controller.dto.ProductSearch;
 import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -10,6 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.SliceImpl;
 
 import java.util.List;
 import java.util.Optional;
@@ -28,7 +32,7 @@ class ProductServiceTest {
     private ProductService productService;
 
     @Test
-    @DisplayName("상품리스트 전체 조회시 반환된 리스트의 개수는 저장되어있는 상품의 개수와 같다.")
+    @DisplayName("검색어 없이 상품리스트 전체 조회시 반환된 리스트의 개수는 저장되어있는 상품의 개수와 같다.")
     public void testGetProductList() {
         //given
         Product product1 = Product.builder().id(1L).name("P1").description("D1").price(1000).quantity(10).build();
@@ -37,13 +41,37 @@ class ProductServiceTest {
 
         List<Product> productList = List.of(product1, product2, product3);
 
-        when(productRepository.findAll()).thenReturn(productList);
+        Slice<Product> productSlice = new SliceImpl<>(productList, PageRequest.ofSize(3), false);
+        when(productRepository.findBySearchOption(1L, null, PageRequest.ofSize(3))).thenReturn(productSlice);
 
         //when
-        List<ProductResponseDto> result = productService.getProductList();
+        List<ProductResponseDto> result = productService.getProductList(null, 3, 1L);
 
         //then
         assertThat(result.size()).isEqualTo(3);
+    }
+
+    @Test
+    @DisplayName("특정 검색어를 입력하고 상품리스트 전체 조회시 반환된 상품의 이름은 검색어가 포함된 상품명과 같다.")
+    public void testGetProductListWithSearchOption() {
+        //given
+        Product product1 = Product.builder().id(1L).name("productA").description("D1").price(1000).quantity(10).build();
+        Product product2 = Product.builder().id(1L).name("productB").description("D1").price(1000).quantity(10).build();
+        Product product3 = Product.builder().id(1L).name("productC").description("D1").price(1000).quantity(10).build();
+        Product product4 = Product.builder().id(1L).name("productD").description("D1").price(1000).quantity(10).build();
+        Product product5 = Product.builder().id(1L).name("productE").description("D1").price(1000).quantity(10).build();
+
+        List<Product> productList = List.of(product1);
+
+        ProductSearch search = new ProductSearch("productA");
+        Slice<Product> productSlice = new SliceImpl<>(productList, PageRequest.ofSize(1), false);
+        when(productRepository.findBySearchOption(1L, search, PageRequest.ofSize(1))).thenReturn(productSlice);
+
+        //when
+        List<ProductResponseDto> result = productService.getProductList(search, 1, 1L);
+
+        //then
+        assertThat(result.get(0).name()).isEqualTo("productA");
     }
 
     @Test

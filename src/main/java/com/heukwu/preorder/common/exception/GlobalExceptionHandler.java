@@ -41,7 +41,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Throwable.class)
     public ResponseEntity<ErrorResponse> methodThrowable(Throwable e) {
         log.error("예상치 못한 에러 발생", e);
-        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), "예상치 못한 에러 발생. 문의가 필요하면 xxc 으로 연락주세요.");
+        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), "예상치 못한 에러 발생. 문의가 필요하면 xxx 으로 연락주세요.");
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(errorResponse);
     }
