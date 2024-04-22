@@ -41,7 +41,7 @@ public class JwtUtil {
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(username)
-                        .claim(AUTHORIZATION_KEY, role)
+                        .claim(AUTHORIZATION_KEY, role.getRole())
                         .setExpiration(new Date(date.getTime() + TOKEN_TIME))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)

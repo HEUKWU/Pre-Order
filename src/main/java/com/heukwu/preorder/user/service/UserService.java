@@ -3,11 +3,10 @@ package com.heukwu.preorder.user.service;
 import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
+import com.heukwu.preorder.common.jwt.JwtUtil;
 import com.heukwu.preorder.common.util.EncryptUtil;
 import com.heukwu.preorder.email.entity.EmailVerificationStatusEnum;
 import com.heukwu.preorder.email.repository.EmailRepository;
-import com.heukwu.preorder.common.jwt.JwtUtil;
-import com.heukwu.preorder.user.controller.dto.LoginRequestDto;
 import com.heukwu.preorder.user.controller.dto.MyPageResponseDto;
 import com.heukwu.preorder.user.controller.dto.PasswordChangeRequestDto;
 import com.heukwu.preorder.user.controller.dto.SignupRequestDto;
@@ -42,7 +41,7 @@ public class UserService {
         }
 
         // 인증된 이메일인지 검증
-        if (emailRepository.findByEmailAndVerificationStatus(encryptor.encrypt(requestDto.email()), EmailVerificationStatusEnum.CREATED).isEmpty()) {
+        if (emailRepository.findByEmailAndVerificationStatus(encryptor.encrypt(requestDto.email()), EmailVerificationStatusEnum.VERIFIED).isEmpty()) {
             throw new BusinessException(ErrorMessage.UNAUTHENTICATED_EMAIL);
         }
 

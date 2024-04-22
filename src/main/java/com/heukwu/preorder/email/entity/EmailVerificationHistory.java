@@ -21,7 +21,7 @@ public class EmailVerificationHistory {
 
     private String code;
 
-    @Enumerated(value = EnumType.ORDINAL)
+    @Enumerated(value = EnumType.STRING)
     private EmailVerificationStatusEnum verificationStatus;
 
     public void verified() {
