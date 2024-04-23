@@ -41,7 +41,7 @@ public class UserService {
         }
 
         // 인증된 이메일인지 검증
-        if (emailRepository.findByEmailAndVerificationStatus(encryptor.encrypt(requestDto.email()), EmailVerificationStatusEnum.VERIFIED).isEmpty()) {
+        if (emailRepository.findByEmailAndVerificationStatus(requestDto.email(), EmailVerificationStatusEnum.VERIFIED).isEmpty()) {
             throw new BusinessException(ErrorMessage.UNAUTHENTICATED_EMAIL);
         }
 

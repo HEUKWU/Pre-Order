@@ -3,7 +3,6 @@ package com.heukwu.preorder.email.service;
 import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
-import com.heukwu.preorder.common.util.EncryptUtil;
 import com.heukwu.preorder.email.controller.dto.EmailVerificationCodeRequestDto;
 import com.heukwu.preorder.email.controller.dto.VerificationCodeValidateRequestDto;
 import com.heukwu.preorder.email.entity.EmailVerificationHistory;
@@ -26,32 +25,29 @@ public class EmailService {
 
     private final EmailRepository emailRepository;
     private final UserRepository userRepository;
-    private final EncryptUtil encryptor;
     private final EmailSender emailSender;
 
     public void sendVerificationEmail(EmailVerificationCodeRequestDto requestDto) {
         checkEmailDuplicate(requestDto.email());
 
         EmailVerificationHistory emailVerificationHistory = getEmailVerificationHistory(requestDto.email());
-        emailSender.sendEmail(requestDto.email(), encryptor.decrypt(emailVerificationHistory.getCode()));
+        emailSender.sendEmail(requestDto.email(),emailVerificationHistory.getCode());
 
         emailRepository.save(emailVerificationHistory);
     }
 
     private void checkEmailDuplicate(String email) {
-        String encryptedEmail = encryptor.encrypt(email);
-
-        if (userRepository.findUserByEmail(encryptedEmail).isPresent()) {
+        if (userRepository.findUserByEmail(email).isPresent()) {
             throw new BusinessException(ErrorMessage.DUPLICATE_EMAIL);
         }
     }
 
     private EmailVerificationHistory getEmailVerificationHistory(String email) {
-        Optional<EmailVerificationHistory> optionalEmailVerificationHistory = emailRepository.findByEmailAndVerificationStatus(encryptor.encrypt(email), EmailVerificationStatusEnum.CREATED);
+        Optional<EmailVerificationHistory> optionalEmailVerificationHistory = emailRepository.findByEmailAndVerificationStatus(email, EmailVerificationStatusEnum.CREATED);
 
         return optionalEmailVerificationHistory.orElseGet(() -> EmailVerificationHistory.builder()
-                .email(encryptor.encrypt(email))
-                .code(encryptor.encrypt(createCode()))
+                .email(email)
+                .code(createCode())
                 .verificationStatus(EmailVerificationStatusEnum.CREATED)
                 .build());
 
@@ -74,15 +70,11 @@ public class EmailService {
     }
 
     public void verificationCode(VerificationCodeValidateRequestDto requestDto) {
-        String encryptedEmail = encryptor.encrypt(requestDto.email());
-
-        EmailVerificationHistory emailVerificationHistory = emailRepository.findEmailByEmail(encryptedEmail).orElseThrow(
+        EmailVerificationHistory emailVerificationHistory = emailRepository.findEmailByEmail(requestDto.email()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_EMAIL)
         );
 
-        String code = encryptor.decrypt(emailVerificationHistory.getCode());
-
-        if (!requestDto.code().equals(code)) {
+        if (!requestDto.code().equals(emailVerificationHistory.getCode())) {
             throw new BusinessException(ErrorMessage.INCORRECT_CODE);
         }
 
