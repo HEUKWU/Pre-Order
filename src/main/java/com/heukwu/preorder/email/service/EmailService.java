@@ -12,6 +12,7 @@ import com.heukwu.preorder.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -69,6 +70,7 @@ public class EmailService {
         }
     }
 
+    @Transactional
     public void verificationCode(VerificationCodeValidateRequestDto requestDto) {
         EmailVerificationHistory emailVerificationHistory = emailRepository.findEmailByEmail(requestDto.email()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_EMAIL)
