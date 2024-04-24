@@ -18,7 +18,7 @@ public class EncryptUtil {
     private byte[] key;
     private SecretKeySpec secretKeySpec;
 
-    public EncryptUtil(@Value("${encrypt.secretKey}") String secretKey) {
+    public EncryptUtil(@Value("${encrypt.secret.key}") String secretKey) {
         try {
             MessageDigest sha = MessageDigest.getInstance("SHA-1");
             key = secretKey.getBytes(StandardCharsets.UTF_8);
