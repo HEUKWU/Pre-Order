@@ -1,5 +1,6 @@
 package com.heukwu.preorder.common.exception;
 
+import com.heukwu.preorder.common.dto.ApiResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -15,17 +16,15 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<ErrorResponse> notFoundException(NotFoundException e) {
-        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.NOT_FOUND.value(), e.getMessage());
+    public ApiResponse<String> notFoundException(NotFoundException e) {
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND.value()).body(errorResponse);
+        return ApiResponse.fail(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ErrorResponse> businessException(BusinessException e) {
-        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.BAD_REQUEST.value(), e.getMessage());
+    public ApiResponse<String> businessException(BusinessException e) {
 
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST.value()).body(errorResponse);
+        return ApiResponse.fail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -39,10 +38,9 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(Throwable.class)
-    public ResponseEntity<ErrorResponse> methodThrowable(Throwable e) {
+    public ApiResponse<String> methodThrowable(Throwable e) {
         log.error("예상치 못한 에러 발생", e);
-        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR.value(), "예상치 못한 에러 발생. 문의가 필요하면 xxx 으로 연락주세요.");
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR.value()).body(errorResponse);
+        return ApiResponse.fail(HttpStatus.INTERNAL_SERVER_ERROR, "예상치 못한 에러 발생. 문의가 필요하면 xxx 으로 연락주세요.");
     }
 }

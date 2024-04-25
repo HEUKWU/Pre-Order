@@ -13,4 +13,8 @@ public record ApiResponse<T>(
     public static ApiResponse<Boolean> success() {
         return new ApiResponse<>(HttpStatus.OK.value(), true);
     }
+
+    public static ApiResponse<String> fail(HttpStatus httpStatus, String message) {
+        return new ApiResponse<>(httpStatus.value(), message);
+    }
 }

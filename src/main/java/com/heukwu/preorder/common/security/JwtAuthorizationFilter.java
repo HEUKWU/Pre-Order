@@ -1,8 +1,8 @@
 package com.heukwu.preorder.common.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.heukwu.preorder.common.dto.ApiResponse;
 import com.heukwu.preorder.common.exception.ErrorMessage;
-import com.heukwu.preorder.common.exception.ErrorResponse;
 import com.heukwu.preorder.common.jwt.JwtUtil;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
@@ -78,7 +78,7 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
         try {
-            String json = new ObjectMapper().writeValueAsString(ErrorResponse.of(status.value(), message.getMessage()));
+            String json = new ObjectMapper().writeValueAsString(ApiResponse.fail(status, message.getMessage()));
             response.getWriter().write(json);
         } catch (Exception e) {
             log.error(e.getMessage());
