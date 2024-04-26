@@ -34,7 +34,7 @@ public class OrderService {
     private final WishlistRepository wishlistRepository;
 
     @Transactional
-    public OrderResponseDto orderProduct(OrderRequestDto requestDto, User user) {
+    public void orderProduct(OrderRequestDto requestDto, User user) {
         Product product = productRepository.findById(requestDto.productId()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
         );
@@ -47,15 +47,12 @@ public class OrderService {
 
         Order order = Order.builder()
                 .totalPrice(product.getPrice() * requestDto.quantity())
-                .quantity(quantity)
                 .userId(user.getId())
-                .orderProduct(orderProduct)
+                .orderProductList(List.of(orderProduct))
                 .status(OrderStatus.CREATED)
                 .build();
 
         orderRepository.save(order);
-
-        return OrderResponseDto.of(order);
     }
 
     public List<OrderResponseDto> getUserOrderInfo(User user) {
@@ -65,7 +62,7 @@ public class OrderService {
     }
 
     @Transactional
-    public List<OrderResponseDto> orderWishlist(User user) {
+    public OrderResponseDto orderWishlist(User user) {
         Wishlist wishlist = wishlistRepository.findById(user.getWishListId()).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_WISHLIST)
         );
@@ -77,40 +74,42 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancelOrder(User user) {
-        List<Order> orderList = orderRepository.findAllByUserId(user.getId());
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_ORDER)
+        );
 
-        for (Order order : orderList) {
-            // 배송이 시작되었다면 취소 불가
-            if (order.isNotCancelable()) {
-                throw new BusinessException(ErrorMessage.CANNOT_CANCEL_ORDER);
-            }
+        if (order.isNotCancelableStatus()) {
+            throw new BusinessException(ErrorMessage.CANNOT_CANCEL_ORDER);
+        }
 
-            order.cancelOrder();
+        order.cancelOrder();
 
-            // 상품 재고 복구
-            Product product = productRepository.findById(order.getOrderProduct().getProductId()).orElseThrow(
+        // 상품 재고 복구
+        List<OrderProduct> orderProductList = order.getOrderProductList();
+        for (OrderProduct orderProduct : orderProductList) {
+            Product product = productRepository.findById(orderProduct.getProductId()).orElseThrow(
                     () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
             );
 
-            product.increaseQuantity(order.getQuantity());
+            product.increaseQuantity(orderProduct.getQuantity());
         }
     }
 
     @Transactional
-    public void returnOrder(User user) {
-        List<Order> orderList = orderRepository.findAllByUserId(user.getId());
+    public void returnOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_ORDER)
+        );
 
-        for (Order order : orderList) {
-            if (order.isNotReturnableStatus()) {
-                throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER_STATUS);
-            }
-            if (order.isNotReturnableDate()) {
-                throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER_DATE);
-            }
-
-            order.returnOrder();
+        if (order.isNotReturnableStatus()) {
+            throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER_STATUS);
         }
+        if (order.isNotReturnableDate()) {
+            throw new BusinessException(ErrorMessage.CANNOT_RETURN_ORDER_DATE);
+        }
+
+        order.returnOrder();
     }
 
 
@@ -135,45 +134,46 @@ public class OrderService {
 
         // 반품 완료 후 하루 지난 상품 재고 복구
         for (Order order : returnedOrders) {
-            Product product = productRepository.findById(order.getOrderProduct().getProductId()).orElseThrow(
-                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
-            );
+            List<OrderProduct> orderProductList = order.getOrderProductList();
+            for (OrderProduct orderProduct : orderProductList) {
+                Product product = productRepository.findById(orderProduct.getProductId()).orElseThrow(
+                        () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
+                );
 
-            product.increaseQuantity(order.getQuantity());
+                product.increaseQuantity(orderProduct.getQuantity());
+            }
+
             order.updateStatus(OrderStatus.RETURNED);
         }
     }
 
-    private List<OrderResponseDto> createOrder(User user, List<WishlistProduct> wishlistProducts) {
-        List<OrderResponseDto> orderResponseDtoList = new ArrayList<>();
-
+    private OrderResponseDto createOrder(User user, List<WishlistProduct> wishlistProducts) {
+        List<OrderProduct> orderProductList = new ArrayList<>();
+        int totalPrice = 0;
         for (WishlistProduct wishlistProduct : wishlistProducts) {
             // 장바구니 상품
             Product product = productRepository.findById(wishlistProduct.getProductId()).orElseThrow(
                     () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT));
 
+            totalPrice += wishlistProduct.getQuantity() * product.getPrice();
+
             // 주문에 따른 상품 수량 감소
             product.decreaseQuantity(wishlistProduct.getQuantity());
 
-            OrderProduct orderProduct = createOrderProduct(product);
-
-            // 주문 생성
-            Order order = Order.builder()
-                    .totalPrice(wishlistProduct.getQuantity() * product.getPrice())
-                    .quantity(wishlistProduct.getQuantity())
-                    .userId(user.getId())
-                    .orderProduct(orderProduct)
-                    .status(OrderStatus.CREATED)
-                    .build();
-
-            orderRepository.save(order);
+            orderProductList.add(createOrderProduct(product));
 
             // 장바구니 상품 삭제
             wishlistProduct.delete();
-            orderResponseDtoList.add(OrderResponseDto.of(order));
         }
 
-        return orderResponseDtoList;
+        Order order = Order.builder()
+                .totalPrice(totalPrice)
+                .userId(user.getId())
+                .orderProductList(orderProductList)
+                .status(OrderStatus.CREATED)
+                .build();
+
+        return OrderResponseDto.of(order);
     }
 
     private OrderProduct createOrderProduct(Product product) {
@@ -189,4 +189,5 @@ public class OrderService {
 
         return orderProduct;
     }
+
 }

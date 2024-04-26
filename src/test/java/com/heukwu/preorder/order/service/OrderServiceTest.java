@@ -60,10 +60,9 @@ class OrderServiceTest {
         OrderRequestDto requestDto = OrderRequestDto.builder().productId(1L).quantity(1).build();
 
         //when
-        OrderResponseDto result = orderService.orderProduct(requestDto, user);
+        orderService.orderProduct(requestDto, user);
 
         //then
-        assertThat(result.totalPrice()).isEqualTo(product.getPrice() * requestDto.quantity());
         assertThat(product.getQuantity()).isEqualTo(9);
     }
 
@@ -90,13 +89,11 @@ class OrderServiceTest {
         OrderProduct orderProduct1 = OrderProduct.builder().id(1L).productId(product.getId()).build();
         OrderProduct orderProduct2 = OrderProduct.builder().id(1L).productId(product.getId()).build();
         OrderProduct orderProduct3 = OrderProduct.builder().id(1L).productId(product.getId()).build();
-        Order order1 = Order.builder().userId(user.getId()).orderProduct(orderProduct1).quantity(1).totalPrice(1000).build();
-        Order order2 = Order.builder().userId(user.getId()).orderProduct(orderProduct2).quantity(1).totalPrice(1000).build();
-        Order order3 = Order.builder().userId(user.getId()).orderProduct(orderProduct3).quantity(1).totalPrice(1000).build();
+        Order order1 = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct1, orderProduct2, orderProduct3)).totalPrice(1000).build();
+        Order order2 = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct1, orderProduct2, orderProduct3)).totalPrice(1000).build();
+        Order order3 = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct1, orderProduct2, orderProduct3)).totalPrice(1000).build();
 
-        List<Order> orders = List.of(order1, order2, order3);
-
-        when(orderRepository.findAllByUserId(user.getId())).thenReturn(orders);
+        when(orderRepository.findAllByUserId(1L)).thenReturn(List.of(order1, order2, order3));
 
         //when
         List<OrderResponseDto> result = orderService.getUserOrderInfo(user);
@@ -120,10 +117,10 @@ class OrderServiceTest {
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
 
         //when
-        List<OrderResponseDto> result = orderService.orderWishlist(user);
+        OrderResponseDto result = orderService.orderWishlist(user);
 
         //then
-        assertThat(result.size()).isEqualTo(2);
+        assertThat(result.orderProductList().size()).isEqualTo(2);
     }
 
     @Test
@@ -133,13 +130,13 @@ class OrderServiceTest {
         User user = User.builder().id(1L).build();
         Product product = Product.builder().id(1L).build();
         OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(product.getId()).build();
-        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.CREATED).build();
+        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.CREATED).build();
 
-        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         //when
-        orderService.cancelOrder(user);
+        orderService.cancelOrder(1L);
 
         //then
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CANCELED);
@@ -151,12 +148,12 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
-        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.SHIPPING).build();
+        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.SHIPPING).build();
 
-        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         //when, then
-        assertThatThrownBy(() -> orderService.cancelOrder(user)).isInstanceOf(BusinessException.class).hasMessage("배송중에는 주문 취소가 불가능합니다.");
+        assertThatThrownBy(() -> orderService.cancelOrder(1L)).isInstanceOf(BusinessException.class).hasMessage("배송중에는 주문 취소가 불가능합니다.");
     }
 
     @Test
@@ -165,12 +162,12 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
-        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.COMPLETED).modifiedAt(LocalDate.now()).build();
+        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.COMPLETED).modifiedAt(LocalDate.now()).build();
 
-        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         //when
-        orderService.returnOrder(user);
+        orderService.returnOrder(1L);
 
         //then
         assertThat(order.getStatus()).isEqualTo(OrderStatus.RETURNING);
@@ -182,12 +179,12 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
-        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.SHIPPING).modifiedAt(LocalDate.now()).build();
+        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.SHIPPING).modifiedAt(LocalDate.now()).build();
 
-        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         //when, then
-        assertThatThrownBy(() -> orderService.returnOrder(user)).isInstanceOf(BusinessException.class).hasMessage("배송이 완료되지 않은 상품은 반품이 불가능합니다.");
+        assertThatThrownBy(() -> orderService.returnOrder(1L)).isInstanceOf(BusinessException.class).hasMessage("배송이 완료되지 않은 상품은 반품이 불가능합니다.");
     }
 
     @Test
@@ -196,11 +193,11 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
-        Order order = Order.builder().userId(user.getId()).orderProduct(orderProduct).quantity(1).totalPrice(1000).status(OrderStatus.COMPLETED).modifiedAt(LocalDate.now().minusDays(2)).build();
+        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.COMPLETED).modifiedAt(LocalDate.now().minusDays(2)).build();
 
-        when(orderRepository.findAllByUserId(user.getId())).thenReturn(List.of(order));
+        when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
         //when, then
-        assertThatThrownBy(() -> orderService.returnOrder(user)).isInstanceOf(BusinessException.class).hasMessage("배송완료 후 2일 이상 지난 상품은 반품이 불가능합니다.");
+        assertThatThrownBy(() -> orderService.returnOrder(1L)).isInstanceOf(BusinessException.class).hasMessage("배송완료 후 2일 이상 지난 상품은 반품이 불가능합니다.");
     }
 }

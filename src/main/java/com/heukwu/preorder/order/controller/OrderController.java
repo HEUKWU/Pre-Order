@@ -22,10 +22,10 @@ public class OrderController {
 
     @Operation(summary = "상품 주문")
     @PostMapping("/order")
-    public ApiResponse<OrderResponseDto> orderProduct(@RequestBody OrderRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
-        OrderResponseDto orderResponseDto = orderService.orderProduct(requestDto, userDetails.getUser());
+    public ApiResponse<Boolean> orderProduct(@RequestBody OrderRequestDto requestDto, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        orderService.orderProduct(requestDto, userDetails.getUser());
 
-        return ApiResponse.success(orderResponseDto);
+        return ApiResponse.success();
     }
 
     @Operation(summary = "주문 정보 조회")
@@ -38,24 +38,24 @@ public class OrderController {
 
     @Operation(summary = "장바구니 일괄 주문")
     @PostMapping("/order-wishlist")
-    public ApiResponse<List<OrderResponseDto>> orderWishlist(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        List<OrderResponseDto> orderResponseDtoList = orderService.orderWishlist(userDetails.getUser());
+    public ApiResponse<OrderResponseDto> orderWishlist(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        OrderResponseDto orderResponseDto = orderService.orderWishlist(userDetails.getUser());
 
-        return ApiResponse.success(orderResponseDtoList);
+        return ApiResponse.success(orderResponseDto);
     }
 
     @Operation(summary = "주문 취소")
-    @DeleteMapping("/order")
-    public ApiResponse<Boolean> cancelOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        orderService.cancelOrder(userDetails.getUser());
+    @DeleteMapping("/order/{orderId}")
+    public ApiResponse<Boolean> cancelOrder(@PathVariable Long orderId) {
+        orderService.cancelOrder(orderId);
 
         return ApiResponse.success();
     }
 
     @Operation(summary = "반품")
-    @PutMapping("/order")
-    public ApiResponse<Boolean> returnOrder(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        orderService.returnOrder(userDetails.getUser());
+    @PutMapping("/order/{orderId}")
+    public ApiResponse<Boolean> returnOrder(@PathVariable Long orderId) {
+        orderService.returnOrder(orderId);
 
         return ApiResponse.success();
     }

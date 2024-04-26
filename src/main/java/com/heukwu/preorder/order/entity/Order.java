@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity(name = "orders")
 @Builder
@@ -26,14 +27,10 @@ public class Order {
     @Column(nullable = false)
     private int totalPrice;
 
-    @Column(nullable = false)
-    private int quantity;
-
     private Long userId;
 
-    @ManyToOne
-    @JoinColumn(name = "orderProductId")
-    private OrderProduct orderProduct;
+    @OneToMany
+    private List<OrderProduct> orderProductList;
 
 
     @Enumerated(EnumType.STRING)
@@ -49,7 +46,7 @@ public class Order {
         this.status = status;
     }
 
-    public boolean isNotCancelable() {
+    public boolean isNotCancelableStatus() {
         return this.status != OrderStatus.CREATED;
     }
 
