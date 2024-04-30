@@ -14,6 +14,7 @@ public enum ErrorMessage {
     DUPLICATE_USERNAME("이미 사용중인 닉네임입니다."),
     DUPLICATE_EMAIL("이미 사용중인 이메일입니다."),
     TOKEN_ERROR("유효하지 않은 토큰입니다."),
+    OUT_OF_STOCK_EXCEPTION("해당 상품은 품절되었습니다."),
     NOT_FOUND_PRODUCT("해당 상품을 찾을 수 없습니다."),
     NOT_FOUND_WISHLIST_PRODUCT("해당 장바구니 상품을 찾을 수 없습니다."),
     NOT_FOUND_WISHLIST("장바구니를 찾을 수 없습니다."),

@@ -1,5 +1,7 @@
 package com.heukwu.preorder.product.entity;
 
+import com.heukwu.preorder.common.exception.BusinessException;
+import com.heukwu.preorder.common.exception.ErrorMessage;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,6 +33,10 @@ public class Product {
 
     public void decreaseQuantity(int quantity) {
         this.quantity -= quantity;
+
+        if (this.quantity < 0) {
+            throw new BusinessException(ErrorMessage.OUT_OF_STOCK_EXCEPTION);
+        }
     }
 
     public void increaseQuantity(int quantity) {
