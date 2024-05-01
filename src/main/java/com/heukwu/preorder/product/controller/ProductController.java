@@ -37,9 +37,9 @@ public class ProductController {
 
     @Operation(summary = "상품 등록")
     @PostMapping("/product")
-    public ApiResponse<ProductResponseDto> createProduct(@RequestBody ProductRequestDto requestDto) {
-        ProductResponseDto productResponseDto = productService.createProduct(requestDto);
+    public ApiResponse<Boolean> createProduct(@RequestBody ProductRequestDto requestDto) {
+        productService.createProduct(requestDto);
 
-        return ApiResponse.success(productResponseDto);
+        return ApiResponse.success();
     }
 }

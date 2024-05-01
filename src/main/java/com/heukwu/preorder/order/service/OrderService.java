@@ -11,7 +11,9 @@ import com.heukwu.preorder.order.entity.OrderStatus;
 import com.heukwu.preorder.order.repository.OrderProductRepository;
 import com.heukwu.preorder.order.repository.OrderRepository;
 import com.heukwu.preorder.product.entity.Product;
+import com.heukwu.preorder.product.entity.Stock;
 import com.heukwu.preorder.product.repository.ProductRepository;
+import com.heukwu.preorder.product.repository.StockRepository;
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.wishlist.entity.Wishlist;
 import com.heukwu.preorder.wishlist.entity.WishlistProduct;
@@ -31,6 +33,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final OrderProductRepository orderProductRepository;
     private final ProductRepository productRepository;
+    private final StockRepository stockRepository;
     private final WishlistRepository wishlistRepository;
 
     @Transactional
@@ -39,11 +42,13 @@ public class OrderService {
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
         );
 
-        OrderProduct orderProduct = createOrderProduct(product);
+        OrderProduct orderProduct = createOrderProduct(product, requestDto.quantity());
 
         // 주문으로 인한 수량 감소
         int quantity = requestDto.quantity();
-        product.decreaseQuantity(quantity);
+        Stock stock = product.getStock();
+
+        stock.decreaseQuantity(quantity);
 
         Order order = Order.builder()
                 .totalPrice(product.getPrice() * requestDto.quantity())
@@ -86,14 +91,7 @@ public class OrderService {
         order.cancelOrder();
 
         // 상품 재고 복구
-        List<OrderProduct> orderProductList = order.getOrderProductList();
-        for (OrderProduct orderProduct : orderProductList) {
-            Product product = productRepository.findById(orderProduct.getProductId()).orElseThrow(
-                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
-            );
-
-            product.increaseQuantity(orderProduct.getQuantity());
-        }
+        recoverProductQuantity(order);
     }
 
     @Transactional
@@ -134,16 +132,21 @@ public class OrderService {
 
         // 반품 완료 후 하루 지난 상품 재고 복구
         for (Order order : returnedOrders) {
-            List<OrderProduct> orderProductList = order.getOrderProductList();
-            for (OrderProduct orderProduct : orderProductList) {
-                Product product = productRepository.findById(orderProduct.getProductId()).orElseThrow(
-                        () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
-                );
-
-                product.increaseQuantity(orderProduct.getQuantity());
-            }
+            recoverProductQuantity(order);
 
             order.updateStatus(OrderStatus.RETURNED);
+        }
+    }
+
+    private void recoverProductQuantity(Order order) {
+        List<OrderProduct> orderProductList = order.getOrderProductList();
+        for (OrderProduct orderProduct : orderProductList) {
+            Product product = productRepository.findById(orderProduct.getProductId()).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
+            );
+
+            Stock stock = product.getStock();
+            stock.increaseQuantity(orderProduct.getQuantity());
         }
     }
 
@@ -158,9 +161,10 @@ public class OrderService {
             totalPrice += wishlistProduct.getQuantity() * product.getPrice();
 
             // 주문에 따른 상품 수량 감소
-            product.decreaseQuantity(wishlistProduct.getQuantity());
+            Stock stock = product.getStock();
+            stock.decreaseQuantity(wishlistProduct.getQuantity());
 
-            orderProductList.add(createOrderProduct(product));
+            orderProductList.add(createOrderProduct(product, wishlistProduct.getQuantity()));
 
             // 장바구니 상품 삭제
             wishlistProduct.delete();
@@ -176,13 +180,13 @@ public class OrderService {
         return OrderResponseDto.of(order);
     }
 
-    private OrderProduct createOrderProduct(Product product) {
+    private OrderProduct createOrderProduct(Product product, int quantity) {
         OrderProduct orderProduct = OrderProduct.builder()
                 .productId(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
-                .quantity(product.getQuantity())
+                .quantity(quantity)
                 .build();
 
         orderProductRepository.save(orderProduct);
