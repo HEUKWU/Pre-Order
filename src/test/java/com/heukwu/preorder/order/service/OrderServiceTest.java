@@ -10,7 +10,9 @@ import com.heukwu.preorder.order.entity.OrderStatus;
 import com.heukwu.preorder.order.repository.OrderProductRepository;
 import com.heukwu.preorder.order.repository.OrderRepository;
 import com.heukwu.preorder.product.entity.Product;
+import com.heukwu.preorder.product.entity.Stock;
 import com.heukwu.preorder.product.repository.ProductRepository;
+import com.heukwu.preorder.product.repository.StockRepository;
 import com.heukwu.preorder.user.entity.User;
 import com.heukwu.preorder.wishlist.entity.Wishlist;
 import com.heukwu.preorder.wishlist.entity.WishlistProduct;
@@ -43,6 +45,9 @@ class OrderServiceTest {
     private ProductRepository productRepository;
 
     @Mock
+    private StockRepository stockRepository;
+
+    @Mock
     private WishlistRepository wishlistRepository;
 
     @InjectMocks
@@ -53,9 +58,11 @@ class OrderServiceTest {
     public void createOrder() {
         //given
         User user = User.builder().id(1L).build();
-        Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).quantity(10).build();
+        Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).build();
+        Stock stock = new Stock(product.getId(), 10);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(stockRepository.findById("1")).thenReturn(Optional.of(stock));
 
         OrderRequestDto requestDto = OrderRequestDto.builder().productId(1L).quantity(1).build();
 
@@ -63,7 +70,7 @@ class OrderServiceTest {
         orderService.orderProduct(requestDto, user);
 
         //then
-        assertThat(product.getQuantity()).isEqualTo(9);
+        assertThat(stock.getQuantity()).isEqualTo(9);
     }
 
     @Test
@@ -109,12 +116,14 @@ class OrderServiceTest {
         Wishlist wishlist = Wishlist.builder().id(1L).build();
         User user = User.builder().id(1L).wishListId(wishlist.getId()).build();
         Product product = Product.builder().id(1L).build();
+        Stock stock = new Stock(product.getId(), 10);
         WishlistProduct wishlistProduct1 = WishlistProduct.builder().id(1L).wishlist(wishlist).productId(product.getId()).quantity(1).build();
         WishlistProduct wishlistProduct2 = WishlistProduct.builder().id(2L).wishlist(wishlist).productId(product.getId()).quantity(1).build();
         wishlist = Wishlist.builder().wishlistProducts(List.of(wishlistProduct1, wishlistProduct2)).build();
 
         when(wishlistRepository.findById(user.getWishListId())).thenReturn(Optional.of(wishlist));
         when(productRepository.findById(product.getId())).thenReturn(Optional.of(product));
+        when(stockRepository.findById(String.valueOf(product.getId()))).thenReturn(Optional.of(stock));
 
         //when
         OrderResponseDto result = orderService.orderWishlist(user);
@@ -129,11 +138,13 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         Product product = Product.builder().id(1L).build();
+        Stock stock = new Stock(product.getId(), 10);
         OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(product.getId()).build();
         Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.CREATED).build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(stockRepository.findById(String.valueOf(product.getId()))).thenReturn(Optional.of(stock));
 
         //when
         orderService.cancelOrder(1L);

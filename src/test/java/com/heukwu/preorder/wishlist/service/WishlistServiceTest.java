@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -49,7 +49,7 @@ class WishlistServiceTest {
         User user = User.builder().id(1L).wishListId(wishlist.getId()).build();
         when(wishlistRepository.findById(user.getWishListId())).thenReturn(Optional.of(wishlist));
 
-        Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).quantity(10).build();
+        Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).build();
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         // 장바구니에 해당 상품이 이미 한개 저장되어있음
@@ -74,7 +74,7 @@ class WishlistServiceTest {
 
         when(wishlistRepository.findById(user.getWishListId())).thenReturn(Optional.of(wishlist));
 
-        Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).quantity(10).build();
+        Product product = Product.builder().id(1L).name("Product").description("Description").price(1000).build();
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
 
         // 장바구니에 해당 상품이 이미 한개 저장되어있음
