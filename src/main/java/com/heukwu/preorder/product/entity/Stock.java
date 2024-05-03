@@ -2,25 +2,23 @@ package com.heukwu.preorder.product.entity;
 
 import com.heukwu.preorder.common.exception.BusinessException;
 import com.heukwu.preorder.common.exception.ErrorMessage;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.redis.core.RedisHash;
 
-@Entity
+@RedisHash("Stock")
 @Getter
 @NoArgsConstructor
 public class Stock {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Long id;
+    private String id;
 
     private int quantity;
 
-    public Stock(int quantity) {
+    public Stock(long productId, int quantity) {
+        this.id = String.valueOf(productId);
         this.quantity = quantity;
     }
 
@@ -36,5 +34,3 @@ public class Stock {
         this.quantity += quantity;
     }
 }
-
-

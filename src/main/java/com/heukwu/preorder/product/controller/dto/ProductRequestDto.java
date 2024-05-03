@@ -6,6 +6,5 @@ import lombok.Builder;
 public record ProductRequestDto(
         String name,
         String description,
-        int price,
-        int quantity
+        int price
 ) { }

@@ -10,8 +10,7 @@ public record ProductResponseDto(
         long id,
         String name,
         String description,
-        int price,
-        Integer quantity
+        int price
 ) {
     public static ProductResponseDto toListResponseDto(Product product) {
         return ProductResponseDto.builder()
@@ -21,13 +20,12 @@ public record ProductResponseDto(
                 .build();
     }
 
-    public static ProductResponseDto of(Product product, int quantity) {
+    public static ProductResponseDto of(Product product) {
         return ProductResponseDto.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
                 .price(product.getPrice())
-                .quantity(quantity)
                 .build();
     }
 }

@@ -1,7 +1,9 @@
 package com.heukwu.preorder.product.repository;
 
 import com.heukwu.preorder.product.entity.Stock;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.repository.CrudRepository;
 
-public interface StockRepository extends JpaRepository<Stock, Long> {
+@RedisHash("Stock")
+public interface StockRepository extends CrudRepository<Stock, String> {
 }

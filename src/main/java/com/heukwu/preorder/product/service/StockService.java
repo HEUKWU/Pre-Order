@@ -2,9 +2,12 @@ package com.heukwu.preorder.product.service;
 
 import com.heukwu.preorder.common.exception.ErrorMessage;
 import com.heukwu.preorder.common.exception.NotFoundException;
+import com.heukwu.preorder.product.controller.dto.ProductStockRequestDto;
 import com.heukwu.preorder.product.controller.dto.ProductStockResponseDto;
 import com.heukwu.preorder.product.entity.Product;
+import com.heukwu.preorder.product.entity.Stock;
 import com.heukwu.preorder.product.repository.ProductRepository;
+import com.heukwu.preorder.product.repository.StockRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,12 +16,27 @@ import org.springframework.stereotype.Service;
 public class StockService {
 
     private final ProductRepository productRepository;
+    private final StockRepository stockRepository;
+
+    public void addProductStock(ProductStockRequestDto requestDto) {
+        Product product = productRepository.findById(requestDto.productId()).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
+        );
+
+        Stock stock = new Stock(product.getId(), requestDto.quantity());
+
+        stockRepository.save(stock);
+    }
 
     public ProductStockResponseDto getProductStock(Long productId) {
         Product product = productRepository.findById(productId).orElseThrow(
                 () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
         );
 
-        return ProductStockResponseDto.of(product.getId(), product.getStock().getQuantity());
+        Stock stock = stockRepository.findById(String.valueOf(productId)).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.Not_FOUND_STOCK)
+        );
+
+        return ProductStockResponseDto.of(product.getId(), stock.getQuantity());
     }
 }

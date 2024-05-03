@@ -46,9 +46,11 @@ public class OrderService {
 
         // 주문으로 인한 수량 감소
         int quantity = requestDto.quantity();
-        Stock stock = product.getStock();
-
+        Stock stock = stockRepository.findById(String.valueOf(product.getId())).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.Not_FOUND_STOCK)
+        );
         stock.decreaseQuantity(quantity);
+        stockRepository.save(stock);
 
         Order order = Order.builder()
                 .totalPrice(product.getPrice() * requestDto.quantity())
@@ -76,6 +78,39 @@ public class OrderService {
 
         // 주문 생성
         return createOrder(user, wishlistProducts);
+    }
+
+    private OrderResponseDto createOrder(User user, List<WishlistProduct> wishlistProducts) {
+        List<OrderProduct> orderProductList = new ArrayList<>();
+        int totalPrice = 0;
+        for (WishlistProduct wishlistProduct : wishlistProducts) {
+            // 장바구니 상품
+            Product product = productRepository.findById(wishlistProduct.getProductId()).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT));
+
+            totalPrice += wishlistProduct.getQuantity() * product.getPrice();
+
+            // 주문에 따른 상품 수량 감소
+            Stock stock = stockRepository.findById(String.valueOf(product.getId())).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.Not_FOUND_STOCK)
+            );
+            stock.decreaseQuantity(wishlistProduct.getQuantity());
+            stockRepository.save(stock);
+
+            orderProductList.add(createOrderProduct(product, wishlistProduct.getQuantity()));
+
+            // 장바구니 상품 삭제
+            wishlistProduct.delete();
+        }
+
+        Order order = Order.builder()
+                .totalPrice(totalPrice)
+                .userId(user.getId())
+                .orderProductList(orderProductList)
+                .status(OrderStatus.CREATED)
+                .build();
+
+        return OrderResponseDto.of(order);
     }
 
     @Transactional
@@ -110,8 +145,8 @@ public class OrderService {
         order.returnOrder();
     }
 
-
     // 주문 상태 변경
+
     @Transactional
     public void updateOrderStatus() {
         List<Order> createdOrders = orderRepository.findAllByStatusAndModifiedAtBefore(OrderStatus.CREATED, LocalDateTime.now().minusDays(1));
@@ -145,39 +180,12 @@ public class OrderService {
                     () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
             );
 
-            Stock stock = product.getStock();
+            Stock stock = stockRepository.findById(String.valueOf(product.getId())).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.Not_FOUND_STOCK)
+            );
             stock.increaseQuantity(orderProduct.getQuantity());
+            stockRepository.save(stock);
         }
-    }
-
-    private OrderResponseDto createOrder(User user, List<WishlistProduct> wishlistProducts) {
-        List<OrderProduct> orderProductList = new ArrayList<>();
-        int totalPrice = 0;
-        for (WishlistProduct wishlistProduct : wishlistProducts) {
-            // 장바구니 상품
-            Product product = productRepository.findById(wishlistProduct.getProductId()).orElseThrow(
-                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT));
-
-            totalPrice += wishlistProduct.getQuantity() * product.getPrice();
-
-            // 주문에 따른 상품 수량 감소
-            Stock stock = product.getStock();
-            stock.decreaseQuantity(wishlistProduct.getQuantity());
-
-            orderProductList.add(createOrderProduct(product, wishlistProduct.getQuantity()));
-
-            // 장바구니 상품 삭제
-            wishlistProduct.delete();
-        }
-
-        Order order = Order.builder()
-                .totalPrice(totalPrice)
-                .userId(user.getId())
-                .orderProductList(orderProductList)
-                .status(OrderStatus.CREATED)
-                .build();
-
-        return OrderResponseDto.of(order);
     }
 
     private OrderProduct createOrderProduct(Product product, int quantity) {
