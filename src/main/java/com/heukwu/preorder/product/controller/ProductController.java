@@ -19,6 +19,14 @@ public class ProductController {
 
     private final ProductService productService;
 
+    @Operation(summary = "상품 등록")
+    @PostMapping("/product")
+    public ApiResponse<Boolean> createProduct(@RequestBody ProductRequestDto requestDto) {
+        productService.createProduct(requestDto);
+
+        return ApiResponse.success();
+    }
+
     @Operation(summary = "상품 목록 조회")
     @GetMapping("/product")
     public ApiResponse<List<ProductResponseDto>> getProductList(ProductSearch search, @RequestParam int size, Long cursorId) {
@@ -33,13 +41,5 @@ public class ProductController {
         ProductResponseDto productResponseDto = productService.getProduct(productId);
 
         return ApiResponse.success(productResponseDto);
-    }
-
-    @Operation(summary = "상품 등록")
-    @PostMapping("/product")
-    public ApiResponse<Boolean> createProduct(@RequestBody ProductRequestDto requestDto) {
-        productService.createProduct(requestDto);
-
-        return ApiResponse.success();
     }
 }

@@ -28,6 +28,13 @@ public class OrderController {
         return ApiResponse.success();
     }
 
+    @PostMapping("/order/payment/{orderId}")
+    public ApiResponse<Boolean> enterPayment(@PathVariable Long orderId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        orderService.enterPayment(orderId, userDetails.getUser());
+
+        return ApiResponse.success();
+    }
+
     @Operation(summary = "주문 정보 조회")
     @GetMapping("/order")
     public ApiResponse<List<OrderResponseDto>> getUserOrderInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {

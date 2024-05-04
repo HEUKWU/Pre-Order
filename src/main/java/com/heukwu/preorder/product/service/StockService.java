@@ -8,10 +8,10 @@ import com.heukwu.preorder.product.entity.Product;
 import com.heukwu.preorder.product.entity.Stock;
 import com.heukwu.preorder.product.repository.ProductRepository;
 import com.heukwu.preorder.product.repository.StockRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -43,22 +43,18 @@ public class StockService {
     }
 
     @Scheduled(fixedRate = 60 * 1000)
+    @Transactional
     public void syncProductQuantity() {
         Iterable<Stock> stocks = stockRepository.findAll();
         for (Stock stock : stocks) {
-            syncQuantity(stock);
-        }
-    }
+            if (stock != null) {
+                long productId = Long.parseLong(stock.getId());
+                Product product = productRepository.findById(productId).orElseThrow(
+                        () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
+                );
 
-    @Transactional
-    public void syncQuantity(Stock stock) {
-        if (stock != null) {
-            long productId = Long.parseLong(stock.getId());
-            Product product = productRepository.findById(productId).orElseThrow(
-                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
-            );
-
-            product.syncQuantity(stock.getQuantity());
+                product.syncQuantity(stock.getQuantity());
+            }
         }
     }
 }

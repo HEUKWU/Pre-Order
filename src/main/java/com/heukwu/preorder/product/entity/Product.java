@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Getter
 @NoArgsConstructor
@@ -28,6 +30,10 @@ public class Product {
 
     @Column(nullable = false)
     private int quantity;
+
+    private ProductStatus status;
+
+    private LocalDateTime salesStartDateTime;
 
     public void syncQuantity(int quantity) {
         this.quantity = quantity;

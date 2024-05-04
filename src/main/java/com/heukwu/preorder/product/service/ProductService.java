@@ -21,6 +21,17 @@ public class ProductService {
 
     private final ProductRepository productRepository;
 
+    public void createProduct(ProductRequestDto requestDto) {
+
+        Product product = Product.builder()
+                .name(requestDto.name())
+                .description(requestDto.description())
+                .price(requestDto.price())
+                .build();
+
+        productRepository.save(product);
+    }
+
     public List<ProductResponseDto> getProductList(ProductSearch search, int size, Long cursorId) {
         Slice<Product> products = productRepository.findBySearchOption(cursorId, search, PageRequest.ofSize(size));
 
@@ -35,16 +46,5 @@ public class ProductService {
 
 
         return ProductResponseDto.of(product);
-    }
-
-    public void createProduct(ProductRequestDto requestDto) {
-
-        Product product = Product.builder()
-                .name(requestDto.name())
-                .description(requestDto.description())
-                .price(requestDto.price())
-                .build();
-
-        productRepository.save(product);
     }
 }

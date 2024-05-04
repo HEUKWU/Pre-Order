@@ -21,7 +21,9 @@ import com.heukwu.preorder.wishlist.repository.WishlistRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,6 +62,19 @@ public class OrderService {
                 .build();
 
         orderRepository.save(order);
+    }
+
+    @Transactional
+    public void enterPayment(long orderId, User user) {
+        Order order = orderRepository.findById(orderId).orElseThrow(
+                () -> new NotFoundException(ErrorMessage.NOT_FOUND_ORDER)
+        );
+
+        order.updateStatus(OrderStatus.PAYING);
+
+        RestTemplate restTemplate = new RestTemplate();
+        String url = "http://localhost:8080/payment/" + orderId;
+        URI uri = restTemplate.postForLocation(url, String.class);
     }
 
     public List<OrderResponseDto> getUserOrderInfo(User user) {
