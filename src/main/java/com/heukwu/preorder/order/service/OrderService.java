@@ -175,7 +175,7 @@ public class OrderService {
 
         // 배송 시작 후 하루 지난 주문 배송완료 처리
         for (Order order : shippingOrders) {
-            order.updateStatus(OrderStatus.COMPLETED);
+            order.updateStatus(OrderStatus.COMPLETED_SHIPMENT);
         }
 
         List<Order> returnedOrders = orderRepository.findAllByStatusAndModifiedAtBefore(OrderStatus.RETURNING, LocalDateTime.now().minusDays(1));

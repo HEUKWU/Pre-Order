@@ -55,7 +55,7 @@ public class Order {
     }
 
     public boolean isNotReturnableStatus() {
-        return this.status != OrderStatus.COMPLETED;
+        return this.status != OrderStatus.COMPLETED_SHIPMENT;
     }
 
     public boolean isNotReturnableDate() {

@@ -173,7 +173,7 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
-        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.COMPLETED).modifiedAt(LocalDate.now()).build();
+        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.COMPLETED_SHIPMENT).modifiedAt(LocalDate.now()).build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
@@ -204,7 +204,7 @@ class OrderServiceTest {
         //given
         User user = User.builder().id(1L).build();
         OrderProduct orderProduct = OrderProduct.builder().id(1L).productId(1L).build();
-        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.COMPLETED).modifiedAt(LocalDate.now().minusDays(2)).build();
+        Order order = Order.builder().userId(user.getId()).orderProductList(List.of(orderProduct)).totalPrice(1000).status(OrderStatus.COMPLETED_SHIPMENT).modifiedAt(LocalDate.now().minusDays(2)).build();
 
         when(orderRepository.findById(1L)).thenReturn(Optional.of(order));
 
