@@ -42,20 +42,23 @@ public class StockService {
         return ProductStockResponseDto.of(product.getId(), stock.getQuantity());
     }
 
-    @Transactional
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 60 * 1000)
     public void syncProductQuantity() {
         Iterable<Stock> stocks = stockRepository.findAll();
         for (Stock stock : stocks) {
-            if (stock != null) {
-                long productId = Long.parseLong(stock.getId());
+            syncQuantity(stock);
+        }
+    }
 
-                Product product = productRepository.findById(productId).orElseThrow(
-                        () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
-                );
+    @Transactional
+    public void syncQuantity(Stock stock) {
+        if (stock != null) {
+            long productId = Long.parseLong(stock.getId());
+            Product product = productRepository.findById(productId).orElseThrow(
+                    () -> new NotFoundException(ErrorMessage.NOT_FOUND_PRODUCT)
+            );
 
-                product.syncQuantity(stock.getQuantity());
-            }
+            product.syncQuantity(stock.getQuantity());
         }
     }
 }
