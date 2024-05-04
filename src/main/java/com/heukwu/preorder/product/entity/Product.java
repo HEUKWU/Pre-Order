@@ -25,4 +25,11 @@ public class Product {
 
     @Column(nullable = false)
     private int price;
+
+    @Column(nullable = false)
+    private int quantity;
+
+    public void syncQuantity(int quantity) {
+        this.quantity = quantity;
+    }
 }
