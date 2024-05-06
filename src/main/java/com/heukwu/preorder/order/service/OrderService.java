@@ -20,6 +20,7 @@ import com.heukwu.preorder.wishlist.entity.WishlistProduct;
 import com.heukwu.preorder.wishlist.repository.WishlistRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -217,4 +218,26 @@ public class OrderService {
         return orderProduct;
     }
 
+    // 결제 시작후 10분 이상 처리되지 않은 주문은 초기상태로 되돌림
+    @Scheduled(fixedRate = 60 * 1000)
+    public void handleFailedPayment() {
+        List<Order> orders = orderRepository.findAllByStatusAndModifiedAtBefore(OrderStatus.PAYING, LocalDateTime.now().minusMinutes(10));
+        for (Order order : orders) {
+            order.updateStatus(OrderStatus.CREATED);
+
+            List<OrderProduct> orderProductList = order.getOrderProductList();
+            for (OrderProduct orderProduct : orderProductList) {
+                Long productId = orderProduct.getProductId();
+                int quantity = orderProduct.getQuantity();
+
+                Stock stock = stockRepository.findById(String.valueOf(productId)).orElseThrow(
+                        () -> new NotFoundException(ErrorMessage.Not_FOUND_STOCK)
+                );
+
+                stock.increaseQuantity(quantity);
+
+                stockRepository.save(stock);
+            }
+        }
+    }
 }
